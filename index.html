@@ -157,6 +157,18 @@ a{color:var(--blue);text-decoration:none}
 .toast{position:fixed;bottom:96px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--g900);color:#fff;
   padding:12px 20px;border-radius:14px;font-size:14px;font-weight:600;z-index:3000;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap}
 .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.gate{position:fixed;inset:0;background:var(--g50);z-index:2500;display:none;overflow-y:auto;padding:0 20px}
+.gate.on{display:block}
+.gate-in{max-width:480px;margin:0 auto;padding:64px 0 40px}
+.gate-logo{font-size:44px;margin-bottom:10px}
+.gate-t{font-size:26px;font-weight:800;letter-spacing:-0.02em}
+.gate-s{font-size:14px;color:var(--g400);font-weight:500;margin:6px 0 24px}
+.gate-err{font-size:13px;font-weight:600;color:var(--red);padding:0 4px 12px;min-height:18px;line-height:1.5}
+.trip-row{display:flex;align-items:center;gap:12px;background:#fff;border-radius:var(--r-md);padding:16px;margin-bottom:10px;width:100%;text-align:left;box-shadow:0 1px 2px rgba(2,32,71,.04)}
+.trip-row:active{background:var(--g25)}
+.trip-row .ic{width:42px;height:42px;border-radius:13px;background:var(--blue-bg);display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
+.trip-row b{font-size:16px;font-weight:700;display:block}
+.trip-row small{font-size:12px;color:var(--g400);display:block;margin-top:2px}
 .sync{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;padding:4px 9px;border-radius:999px;background:var(--g50);color:var(--g400)}
 .sync.ok{background:#E7F8F0;color:#00A661}
 .sync.saving{background:var(--blue-bg);color:var(--blue)}
@@ -252,6 +264,33 @@ a{color:var(--blue);text-decoration:none}
     <svg viewBox="0 0 24 24" fill="none"><path d="M8 3h8a2 2 0 0 1 2 2v16l-6-3-6 3V5a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>정보</button>
 </nav>
 
+<!-- 로그인 게이트 -->
+<div class="gate" id="authGate">
+  <div class="gate-in">
+    <div class="gate-logo">🧳</div>
+    <h1 class="gate-t">트립로그</h1>
+    <p class="gate-s" id="authSub">아이디와 비밀번호로 시작하세요</p>
+    <div class="field"><span class="lab">아이디</span><input id="au-id" placeholder="영문·숫자" autocomplete="username" autocapitalize="off"></div>
+    <div class="field"><span class="lab">비번</span><input id="au-pw" type="password" placeholder="4자리 이상" autocomplete="current-password" inputmode="numeric"></div>
+    <div class="gate-err" id="au-err"></div>
+    <button class="btn btn-blue" id="au-go">로그인</button>
+    <button class="btn btn-grey" id="au-swap" style="margin-top:8px">처음이신가요? 회원가입</button>
+  </div>
+</div>
+
+<!-- 여행 선택 게이트 -->
+<div class="gate" id="tripGate">
+  <div class="gate-in">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+      <h1 class="gate-t" style="margin:0">내 여행</h1>
+      <button id="tg-out" style="font-size:12.5px;font-weight:700;color:var(--g400)">로그아웃</button>
+    </div>
+    <p class="gate-s" id="tg-who"></p>
+    <div id="tg-list"></div>
+    <button class="btn btn-blue" id="tg-new" style="margin-top:14px">새 여행 만들기</button>
+  </div>
+</div>
+
 <div class="dim" id="dim"></div>
 <div class="sheet" id="sheet">
   <div class="sheet-hd"><div class="sheet-grip"></div><h2 id="sheetTitle"></h2></div>
@@ -276,50 +315,193 @@ let S={
 let curDay=0, curDocCat='전체', curShopSeg='items';
 let memOnly=false;
 
-/* ===== Supabase 설정 (여러 명이 같은 기록을 보려면 필수) =====
-   1) supabase.com 에서 프로젝트 생성
-   2) SQL Editor에 아래 실행:
-        create table trips (
-          code text primary key,
-          data jsonb,
-          updated_at timestamptz default now()
-        );
-        alter table trips enable row level security;
-        create policy "public rw" on trips for all using (true) with check (true);
-   3) Settings → API 에서 Project URL과 anon public 키를 아래에 붙여넣기        */
+/* ===== Supabase 설정 =====
+   1) supabase.com 프로젝트 생성 → SQL Editor에 아래 전체 실행:
+
+create extension if not exists pgcrypto;
+
+create table trips (
+  code text primary key,
+  data jsonb default '{}'::jsonb,
+  owner_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
+  join_secret text not null default encode(gen_random_bytes(8),'hex'),
+  updated_at timestamptz default now()
+);
+create table trip_members (
+  code text not null references trips(code) on delete cascade,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  primary key (code, user_id)
+);
+alter table trips enable row level security;
+alter table trip_members enable row level security;
+
+create or replace function is_member(t text) returns boolean
+language sql security definer stable as $$
+  select exists(select 1 from trip_members m where m.code=t and m.user_id=auth.uid());
+$$;
+
+create policy "trip read"   on trips for select using (owner_id=auth.uid() or is_member(code));
+create policy "trip insert" on trips for insert with check (owner_id=auth.uid());
+create policy "trip update" on trips for update using (owner_id=auth.uid() or is_member(code));
+create policy "trip delete" on trips for delete using (owner_id=auth.uid());
+create policy "mem read"    on trip_members for select using (user_id=auth.uid());
+create policy "mem leave"   on trip_members for delete using (user_id=auth.uid());
+
+create or replace function join_trip(p_code text, p_secret text) returns boolean
+language plpgsql security definer as $$
+begin
+  if not exists(select 1 from trips where code=p_code and join_secret=p_secret) then
+    return false;
+  end if;
+  insert into trip_members(code,user_id) values(p_code,auth.uid()) on conflict do nothing;
+  return true;
+end; $$;
+
+   2) Authentication → Sign In / Providers → Email 에서
+      "Confirm email" 끄기 (아이디 로그인이라 인증메일이 필요 없어요)
+   3) Settings → API 에서 아래 두 값 붙여넣기                       */
 const SUPABASE_URL = 'https://hmodjglzhubvvqlygdfl.supabase.co';      // 예: https://abcd.supabase.co
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhtb2RqZ2x6aHVidnZxbHlnZGZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwNTA3MDksImV4cCI6MjEwMjYyNjcwOX0.9-bmgGi5ECizgIgRmujCudjkXh4_mA5zEslvisnd_EE';
 
 const cloudOn = ()=>SUPABASE_URL.startsWith('http') && SUPABASE_KEY.length>20;
-/* 여행 코드: 주소 뒤 ?trip=코드 로 구분. 같은 링크를 연 사람은 같은 기록을 봐요 */
-function tripCode(){
-  const u=new URL(location.href);
-  let c=u.searchParams.get('trip');
-  if(!c){
-    c=localStorage.getItem('tripmate-lastcode')||Math.random().toString(36).slice(2,8);
-    u.searchParams.set('trip',c);
-    history.replaceState(null,'',u);
-  }
-  try{localStorage.setItem('tripmate-lastcode',c);}catch(e){}
-  return c;
-}
-const CODE=cloudOn()?tripCode():'local';
-const sbHeaders={'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json'};
+/* 아이디 → 내부 이메일, 짧은 비번은 자동 패딩 (4자리도 가능) */
+const ID_DOMAIN='@tripmate.local', PW_PAD='::tripmate-9f2a';
+const toEmail=id=>id.trim().toLowerCase().replace(/[^a-z0-9._-]/g,'')+ID_DOMAIN;
+const toPw=pw=>pw+PW_PAD;
+const fromEmail=e=>(e||'').replace(ID_DOMAIN,'');
 
+let session=null, CODE=null, myName='';
+const SKEY='tripmate-session';
+function saveSession(x){session=x;try{localStorage.setItem(SKEY,JSON.stringify(x));}catch(e){}}
+function clearSession(){session=null;try{localStorage.removeItem(SKEY);}catch(e){}}
+function loadSession(){try{session=JSON.parse(localStorage.getItem(SKEY)||'null');}catch(e){session=null;}}
+
+function hdrs(){
+  return {'apikey':SUPABASE_KEY,'Content-Type':'application/json',
+    'Authorization':'Bearer '+(session&&session.access_token?session.access_token:SUPABASE_KEY)};
+}
+async function api(path,opts){
+  opts=opts||{};
+  let r=await fetch(SUPABASE_URL+path,{...opts,headers:{...hdrs(),...(opts.headers||{})}});
+  if(r.status===401&&session&&session.refresh_token){
+    if(await doRefresh()) r=await fetch(SUPABASE_URL+path,{...opts,headers:{...hdrs(),...(opts.headers||{})}});
+  }
+  return r;
+}
+async function doRefresh(){
+  try{
+    const r=await fetch(SUPABASE_URL+'/auth/v1/token?grant_type=refresh_token',{
+      method:'POST',headers:{'apikey':SUPABASE_KEY,'Content-Type':'application/json'},
+      body:JSON.stringify({refresh_token:session.refresh_token})});
+    if(!r.ok){clearSession();return false;}
+    const j=await r.json();saveSession(j);return true;
+  }catch(e){return false;}
+}
+async function authRequest(kind,id,pw){
+  const path=kind==='signup'?'/auth/v1/signup':'/auth/v1/token?grant_type=password';
+  const r=await fetch(SUPABASE_URL+path,{
+    method:'POST',headers:{'apikey':SUPABASE_KEY,'Content-Type':'application/json'},
+    body:JSON.stringify({email:toEmail(id),password:toPw(pw)})});
+  const j=await r.json();
+  if(!r.ok||j.error){
+    const m=(j.error_description||j.msg||j.message||'').toLowerCase();
+    if(m.includes('invalid login')) throw new Error('아이디 또는 비밀번호가 맞지 않아요');
+    if(m.includes('already registered')||m.includes('already been')) throw new Error('이미 있는 아이디예요. 로그인해 주세요');
+    if(m.includes('confirm')) throw new Error('Supabase에서 "Confirm email"을 꺼주세요');
+    throw new Error(j.msg||j.error_description||'요청에 실패했어요');
+  }
+  if(!j.access_token) throw new Error('가입은 됐지만 자동 로그인에 실패했어요. 로그인해 주세요');
+  saveSession(j);
+  myName=id.trim().toLowerCase();
+  return j;
+}
+
+/* ---------- 게이트 화면 ---------- */
+const showGate=g=>{document.querySelectorAll('.gate').forEach(x=>x.classList.remove('on'));if(g)$(g).classList.add('on');};
+let authMode='login';
+function initAuthUI(){
+  const err=$('#au-err'), go=$('#au-go'), swap=$('#au-swap');
+  swap.onclick=()=>{
+    authMode=authMode==='login'?'signup':'login';
+    go.textContent=authMode==='login'?'로그인':'가입하고 시작하기';
+    swap.textContent=authMode==='login'?'처음이신가요? 회원가입':'이미 계정이 있어요';
+    $('#authSub').textContent=authMode==='login'?'아이디와 비밀번호로 시작하세요':'쓰고 싶은 아이디와 비밀번호를 정하세요';
+    err.textContent='';
+  };
+  go.onclick=async()=>{
+    const id=$('#au-id').value.trim(), pw=$('#au-pw').value;
+    if(!id){err.textContent='아이디를 입력해 주세요';return;}
+    if(pw.length<4){err.textContent='비밀번호는 4자리 이상 입력해 주세요';return;}
+    err.textContent='';go.textContent='잠시만요…';go.disabled=true;
+    try{ await authRequest(authMode,id,pw); await afterLogin(); }
+    catch(e){ err.textContent=e.message; }
+    go.disabled=false;go.textContent=authMode==='login'?'로그인':'가입하고 시작하기';
+  };
+  $('#au-pw').onkeydown=e=>{if(e.key==='Enter')go.click();};
+  $('#tg-out').onclick=()=>{clearSession();location.href=location.pathname;};
+  $('#tg-new').onclick=()=>createTrip();
+}
+
+async function afterLogin(){
+  const u=new URL(location.href);
+  const code=u.searchParams.get('trip'), k=u.searchParams.get('k');
+  if(code&&k){ await api('/rest/v1/rpc/join_trip',{method:'POST',body:JSON.stringify({p_code:code,p_secret:k})}); }
+  if(code){ CODE=code; return openTrip(); }
+  return showTripList();
+}
+async function showTripList(){
+  showGate('#tripGate');
+  $('#tg-who').textContent=myName?myName+'님, 어디로 떠나볼까요?':'어디로 떠나볼까요?';
+  const w=$('#tg-list');w.innerHTML='<div class="empty">불러오는 중…</div>';
+  try{
+    const r=await api('/rest/v1/trips?select=code,data,updated_at&order=updated_at.desc');
+    const rows=await r.json();
+    if(!rows.length){w.innerHTML='<div class="empty"><span class="emo">✈️</span>아직 여행이 없어요<br>아래에서 첫 여행을 만들어 보세요</div>';return;}
+    w.innerHTML='';
+    rows.forEach(t=>{
+      const title=(t.data&&t.data.title)||'이름 없는 여행';
+      const n=(t.data&&t.data.days)?t.data.days.length:0;
+      const b=document.createElement('button');b.className='trip-row';
+      b.innerHTML='<span class="ic">🧳</span><span style="min-width:0;flex:1"><b>'+esc(title)+'</b><small>'+n+'일 일정 · '+esc(t.code)+'</small></span>';
+      b.onclick=()=>{CODE=t.code;setUrl();openTrip();};
+      w.appendChild(b);
+    });
+  }catch(e){w.innerHTML='<div class="empty">불러오지 못했어요</div>';}
+}
+async function createTrip(){
+  const btn=$('#tg-new');btn.disabled=true;btn.textContent='만드는 중…';
+  try{
+    const code=Math.random().toString(36).slice(2,8);
+    const r=await api('/rest/v1/trips',{method:'POST',headers:{'Prefer':'return=representation'},
+      body:JSON.stringify({code,data:{title:'',days:[{stops:[]}]}})});
+    if(!r.ok) throw new Error();
+    CODE=code;setUrl();await openTrip();
+  }catch(e){ toast('여행을 만들지 못했어요'); }
+  btn.disabled=false;btn.textContent='새 여행 만들기';
+}
+function setUrl(){
+  const u=new URL(location.href);u.searchParams.set('trip',CODE);u.searchParams.delete('k');
+  history.replaceState(null,'',u);
+}
+async function openTrip(){
+  showGate(null);
+  await load();
+  boot();
+}
+
+/* ---------- 데이터 ---------- */
 function setSync(state,text){
   const el=$('#syncState');if(!el)return;
   el.className='sync '+state;
-  el.innerHTML=`<span class="dot"></span>${text}`;
+  el.innerHTML='<span class="dot"></span>'+text;
 }
-
 async function load(){
   try{
     if(cloudOn()){
-      const r=await fetch(`${SUPABASE_URL}/rest/v1/trips?code=eq.${encodeURIComponent(CODE)}&select=data`,{headers:sbHeaders});
-      if(!r.ok) throw new Error('HTTP '+r.status);
+      const r=await api('/rest/v1/trips?code=eq.'+encodeURIComponent(CODE)+'&select=data');
       const rows=await r.json();
       if(rows[0]&&rows[0].data) S={...S,...rows[0].data};
-      setSync('ok','모두와 공유 중');
+      setSync('ok','자동 저장 중');
     }else if(window.storage){
       const r=await window.storage.get(KEY);
       if(r&&r.value) S={...S,...JSON.parse(r.value)};
@@ -329,55 +511,41 @@ async function load(){
       if(v) S={...S,...JSON.parse(v)};
       setSync('','이 기기에만 저장');
     }
-  }catch(e){
-    setSync('err','불러오기 실패');
-    try{const v=localStorage.getItem(KEY);if(v)S={...S,...JSON.parse(v)};}catch(_){}
-  }
+  }catch(e){ setSync('err','불러오기 실패'); }
   if(!S.days||!S.days.length) S=Object.assign(S,{days:[{stops:[]}]});
   if(!S.cats) S.cats={budget:[],docs:[]};
 }
-
 let saveTimer=null;
 function save(){
   clearTimeout(saveTimer);
   if(cloudOn()) setSync('saving','저장 중…');
   saveTimer=setTimeout(async()=>{
     const v=JSON.stringify(S);
-    try{ localStorage.setItem(KEY,v); }catch(e){}   // 오프라인 대비 사본
+    try{ localStorage.setItem(KEY+':'+CODE,v); }catch(e){}
     try{
       if(cloudOn()){
-        const r=await fetch(`${SUPABASE_URL}/rest/v1/trips?on_conflict=code`,{
-          method:'POST',
-          headers:{...sbHeaders,'Prefer':'resolution=merge-duplicates'},
-          body:JSON.stringify({code:CODE,data:S,updated_at:new Date().toISOString()})
-        });
-        if(!r.ok) throw new Error('HTTP '+r.status);
-        setSync('ok','모두와 공유 중');
-      }else if(window.storage){
-        await window.storage.set(KEY,v);
-      }
+        const r=await api('/rest/v1/trips?code=eq.'+encodeURIComponent(CODE),{
+          method:'PATCH',body:JSON.stringify({data:S,updated_at:new Date().toISOString()})});
+        if(!r.ok) throw new Error();
+        setSync('ok','자동 저장 중');
+      }else if(window.storage){ await window.storage.set(KEY,v); }
     }catch(e){ setSync('err','저장 실패 — 이 기기에만 보관됨'); }
+    saveTimer=null;
   },700);
 }
-
-/* 다른 사람이 수정한 내용 가져오기 (탭 복귀 시 + 20초마다) */
 let pulling=false;
 async function pull(){
-  if(!cloudOn()||pulling||saveTimer)return;
+  if(!cloudOn()||!CODE||pulling||saveTimer)return;
   pulling=true;
   try{
-    const r=await fetch(`${SUPABASE_URL}/rest/v1/trips?code=eq.${encodeURIComponent(CODE)}&select=data`,{headers:sbHeaders});
+    const r=await api('/rest/v1/trips?code=eq.'+encodeURIComponent(CODE)+'&select=data');
     const rows=await r.json();
-    if(rows[0]&&rows[0].data){
-      const fresh=JSON.stringify(rows[0].data);
-      if(fresh!==JSON.stringify(S)){
-        S={...S,...rows[0].data};
-        if(document.activeElement&&document.activeElement.tagName==='INPUT')return;
-        renderPlan();renderFood();renderShop();renderBudget();renderDocs();
-        $('#tripTitle').value=S.title||'';
-        setSync('ok','업데이트됨');
-        setTimeout(()=>setSync('ok','모두와 공유 중'),2000);
-      }
+    if(rows[0]&&rows[0].data&&JSON.stringify(rows[0].data)!==JSON.stringify(S)){
+      if(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName))return;
+      S={...S,...rows[0].data};
+      renderPlan();renderFood();renderShop();renderBudget();renderDocs();
+      $('#tripTitle').value=S.title||'';
+      setSync('ok','업데이트됨');setTimeout(()=>setSync('ok','자동 저장 중'),2000);
     }
   }catch(e){}finally{pulling=false;}
 }
@@ -912,28 +1080,67 @@ $('#addDocBtn').onclick=()=>{
 };
 
 /* ================= init ================= */
+/* 공유: join_secret이 담긴 초대 링크 생성 */
 $('#shareBtn').onclick=async()=>{
   if(!cloudOn()){
-    openSheet('링크 공유',`<div style="font-size:13.5px;color:#6B7684;line-height:1.7;padding:4px 4px 16px">
-      아직 이 기기에만 저장되고 있어요.<br>다른 사람과 같은 기록을 보려면 파일 상단의
-      <b style="color:#191F28">SUPABASE_URL</b>과 <b style="color:#191F28">SUPABASE_KEY</b>를 설정해 주세요.</div>
-      <button class="btn btn-grey" onclick="closeSheet()">닫기</button>`);
+    openSheet('링크 공유','<div style="font-size:13.5px;color:#6B7684;line-height:1.7;padding:4px 4px 16px">아직 이 기기에만 저장되고 있어요.<br>같이 쓰려면 파일 상단의 <b style="color:#191F28">SUPABASE_URL</b>과 <b style="color:#191F28">SUPABASE_KEY</b>를 설정해 주세요.</div><button class="btn btn-grey" onclick="closeSheet()">닫기</button>');
     return;
   }
-  const url=location.href;
-  try{ await navigator.clipboard.writeText(url); toast('링크를 복사했어요'); }
-  catch(e){
-    openSheet('링크 공유',`<div class="field"><input value="${esc(url)}" readonly onclick="this.select()"></div>
-      <div style="font-size:12.5px;color:#8B95A1;padding:0 4px 14px">이 링크를 연 사람은 같은 기록을 보고 함께 수정할 수 있어요</div>
-      <button class="btn btn-grey" onclick="closeSheet()">닫기</button>`);
-  }
+  let url=location.href;
+  try{
+    const r=await api('/rest/v1/trips?code=eq.'+encodeURIComponent(CODE)+'&select=join_secret');
+    const rows=await r.json();
+    if(rows[0]&&rows[0].join_secret){
+      const u=new URL(location.href);
+      u.searchParams.set('trip',CODE);u.searchParams.set('k',rows[0].join_secret);
+      url=u.toString();
+    }
+  }catch(e){}
+  openSheet('함께 보기',
+    '<div style="font-size:13.5px;color:#6B7684;line-height:1.7;padding:0 4px 14px">이 링크를 받은 사람이 <b style="color:#191F28">각자 아이디로 로그인</b>하면 이 여행을 함께 보고 수정할 수 있어요.</div>'+
+    '<div class="field"><input id="sh-url" value="'+esc(url)+'" readonly></div>'+
+    '<button class="btn btn-blue" id="sh-copy">링크 복사하기</button>'+
+    '<button class="btn btn-grey" style="margin-top:8px" onclick="closeSheet()">닫기</button>');
+  $('#sh-url').onclick=function(){this.select();};
+  $('#sh-copy').onclick=async()=>{
+    try{ await navigator.clipboard.writeText(url); toast('링크를 복사했어요'); closeSheet(); }
+    catch(e){ $('#sh-url').select(); toast('링크를 길게 눌러 복사해 주세요'); }
+  };
 };
 
-(async()=>{
-  await load();
+/* 여행 목록으로 돌아가기 */
+$('#tripTitle').addEventListener('dblclick',()=>{});
+function addTripSwitcher(){
+  const bar=$('#syncState').parentNode;
+  const b=document.createElement('button');
+  b.className='sharebtn';b.style.background='var(--g50)';b.style.color='var(--g500)';
+  b.textContent='내 여행';
+  b.onclick=()=>{ if(cloudOn()){ history.replaceState(null,'',location.pathname); showTripList(); } };
+  if(cloudOn()) bar.appendChild(b);
+}
+
+/* ---------- 시작 ---------- */
+let booted=false;
+function boot(){
   $('#tripTitle').value=S.title||'';
+  if(booted){ renderPlan();renderFood();renderShop();renderBudget();renderDocs(); return; }
+  booted=true;
   loadGmaps();
   renderPlan();renderFood();renderShop();renderBudget();renderDocs();
+  addTripSwitcher();
+}
+
+(async()=>{
+  if(!cloudOn()){ CODE='local'; await load(); boot(); return; }
+  initAuthUI();
+  loadSession();
+  if(session&&session.access_token){
+    myName=fromEmail(session.user&&session.user.email);
+    try{ await afterLogin(); }
+    catch(e){ clearSession(); showGate('#authGate'); }
+  }else{
+    showGate('#authGate');
+  }
 })();
 </script>
 </body>
