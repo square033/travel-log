@@ -79,7 +79,7 @@ a{color:var(--blue);text-decoration:none}
 #map{height:38vh;min-height:240px;max-height:380px;border-radius:var(--r-md);margin-bottom:12px;z-index:1;box-shadow:0 1px 3px rgba(2,32,71,.06)}
 .daychips{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 12px;scrollbar-width:none}
 .daychips::-webkit-scrollbar{display:none}
-.dchip{flex-shrink:0;padding:8px 15px;border-radius:16px;background:var(--white);color:var(--g500);font-size:14px;font-weight:700;box-shadow:0 1px 2px rgba(2,32,71,.05);transition:all .15s;line-height:1.25;text-align:center}
+.dchip{flex-shrink:0;padding:7px 13px;border-radius:14px;background:var(--white);color:var(--g500);font-size:13px;font-weight:700;box-shadow:0 1px 2px rgba(2,32,71,.05);transition:all .15s;line-height:1.25;text-align:center}
 .dchip .dd{display:block;font-size:10.5px;font-weight:600;opacity:.62;margin-top:3px}
 .day-head .dsub{display:inline-block;font-size:13px;font-weight:600;color:var(--g400);margin-left:9px}
 .moveday{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}
@@ -127,12 +127,27 @@ a{color:var(--blue);text-decoration:none}
 .exp-name{font-size:15px;font-weight:600;flex:1;min-width:0}
 .exp-cat{font-size:12px;color:var(--g400);font-weight:500;margin-top:1px}
 .exp-amt{font-size:15.5px;font-weight:700;flex-shrink:0}
-.catpick{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}
-.catpick button{padding:8px 13px;border-radius:999px;background:var(--g50);font-size:13.5px;font-weight:600;color:var(--g500)}
+.catpick{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.catpick button{padding:7px 11px;border-radius:999px;background:var(--g50);font-size:13px;font-weight:600;color:var(--g500)}
 .catpick button.on{background:var(--g900);color:#fff}
 
 /* ---------- docs ---------- */
-.doc-tabs{display:flex;gap:8px;overflow-x:auto;padding-bottom:12px;scrollbar-width:none}
+.doc-tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;scrollbar-width:none}
+.stop-body{cursor:pointer}
+#foodList .card,#shopPlaceList .card{cursor:pointer}
+#foodList .card:active,#shopPlaceList .card:active{background:var(--g25)}
+.mapwrap{position:relative;margin-bottom:10px}
+.mapwrap #map{margin-bottom:0}
+.recenter{position:absolute;right:10px;bottom:10px;z-index:3;background:rgba(255,255,255,.95);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:var(--g700);font-size:12.5px;font-weight:700;
+  padding:8px 13px;border-radius:999px;box-shadow:0 2px 8px rgba(2,32,71,.18)}
+.recenter:active{background:var(--g50)}
+.mapwrap #foodMap,.mapwrap #shopMap{margin-bottom:0}
+.doc-tabs.float{position:absolute;top:8px;left:8px;right:8px;padding:0;z-index:2;-webkit-overflow-scrolling:touch;
+  mask-image:linear-gradient(to right,#000 88%,transparent);-webkit-mask-image:linear-gradient(to right,#000 88%,transparent)}
+.doc-tabs.float .dchip{padding:6px 11px;font-size:12px;background:rgba(255,255,255,.94);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 1px 4px rgba(2,32,71,.14)}
+.doc-tabs.float .dchip.on{color:#fff}
 .doc-tabs::-webkit-scrollbar{display:none}
 
 /* ---------- bottom sheet ---------- */
@@ -165,7 +180,7 @@ a{color:var(--blue);text-decoration:none}
 #shopMap{height:34vh;min-height:220px;max-height:340px;border-radius:var(--r-md);margin-bottom:10px;background:#fff;box-shadow:0 1px 3px rgba(2,32,71,.06)}
 #shopMap .map-off{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--g400);font-size:13px;font-weight:600;text-align:center;padding:16px}
 .tagpin{display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;border:2.5px solid #fff;box-shadow:0 2px 8px rgba(2,32,71,.35);font-size:15px;cursor:pointer}
-.shop-tag{display:inline-block;font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:999px;margin-bottom:4px}
+.shop-tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;margin-bottom:3px}
 .acbox{margin-bottom:10px}
 .acbox .sr{border-bottom:1px solid var(--g50)}
 .acbox .searching{padding:16px;font-size:13px;line-height:1.6}
@@ -262,7 +277,7 @@ a{color:var(--blue);text-decoration:none}
       <button id="shareBtn" class="sharebtn">링크 공유</button>
     </div>
   </div>
-  <div id="map"></div>
+  <div class="mapwrap"><div id="map"></div><button class="recenter" id="planRecenter">핀 보기</button></div>
   <div class="daychips" id="dayChips"></div>
   <div class="card">
     <div class="day-head">
@@ -280,8 +295,7 @@ a{color:var(--blue);text-decoration:none}
 <!-- ===== 맛집 ===== -->
 <div class="page" id="pg-food">
   <div class="topbar"><h1>맛집 리스트</h1><div class="sub">가고 싶은 곳, 계속 모아두세요</div></div>
-  <div id="foodMap"></div>
-  <div class="doc-tabs" id="foodTabs"></div>
+  <div class="mapwrap"><div id="foodMap"></div><div class="doc-tabs float" id="foodTabs"></div><button class="recenter" id="foodRecenter">핀 보기</button></div>
   <div id="foodList"></div>
   <button class="btn btn-blue" id="addFoodBtn" style="margin-top:6px">맛집 추가하기</button>
 </div>
@@ -298,8 +312,7 @@ a{color:var(--blue);text-decoration:none}
     <button class="btn btn-blue" id="addShopItemBtn" style="margin-top:6px">살 것 추가하기</button>
   </div>
   <div id="shopPlacesWrap" style="display:none">
-    <div id="shopMap"></div>
-    <div class="doc-tabs" id="shopTabs"></div>
+    <div class="mapwrap"><div id="shopMap"></div><div class="doc-tabs float" id="shopTabs"></div><button class="recenter" id="shopRecenter">핀 보기</button></div>
     <div id="shopPlaceList"></div>
     <button class="btn btn-blue" id="addShopPlaceBtn" style="margin-top:6px">쇼핑 장소 추가하기</button>
   </div>
@@ -767,11 +780,16 @@ function loadGmaps(){
   }
   window.__gmInit=async()=>{
     try{
-      const [{Map,InfoWindow,Polyline,LatLngBounds},{AdvancedMarkerElement}]=await Promise.all([
+      const [mapsLib,markerLib,coreLib]=await Promise.all([
         google.maps.importLibrary('maps'),
-        google.maps.importLibrary('marker')
+        google.maps.importLibrary('marker'),
+        google.maps.importLibrary('core')      /* LatLngBounds는 core에 있어요 */
       ]);
+      const {Map,InfoWindow,Polyline}=mapsLib;
+      const {AdvancedMarkerElement}=markerLib;
+      const LatLngBounds=(coreLib&&coreLib.LatLngBounds)||mapsLib.LatLngBounds||google.maps.LatLngBounds;
       GM={Map,InfoWindow,Polyline,LatLngBounds,AdvancedMarkerElement};
+      if(!LatLngBounds)throw new Error('LatLngBounds를 불러오지 못했어요');
       const ri0=regionInfo();
       map=new Map($('#map'),{
         center:{lat:ri0[2],lng:ri0[3]},zoom:ri0[4],mapId:'DEMO_MAP_ID',
@@ -805,7 +823,7 @@ function loadGmaps(){
   window.gm_authFailure=()=>mapOff('구글맵 인증에 실패했어요','사용 중: '+keySrc+' ('+key.slice(0,8)+'…)<br>키 값·리퍼러 제한·결제 연결을 확인해 주세요','키 다시 입력하기');
   setTimeout(()=>{ if(!gmapReady) mapOff('지도가 응답하지 않아요','사용 중: '+keySrc+' ('+key.slice(0,8)+'…)<br>브라우저 콘솔(F12)에 자세한 이유가 나와요','키 다시 입력하기'); },8000);
   const sc=document.createElement('script');
-  sc.src=`https://maps.googleapis.com/maps/api/js?key=${key}&libraries=maps,marker,places&language=ko&region=KR&loading=async&v=weekly&callback=__gmInit`;
+  sc.src=`https://maps.googleapis.com/maps/api/js?key=${key}&libraries=core,maps,marker,places&language=ko&region=KR&loading=async&v=weekly&callback=__gmInit`;
   sc.async=true;
   sc.onerror=()=>mapOff('지도를 불러오지 못했어요','깃페이지에 올린 뒤 열면 정상 표시돼요. (미리보기 환경은 외부 스크립트가 차단돼요)');
   document.head.appendChild(sc);
@@ -862,15 +880,60 @@ function drawMap(){
         position:{lat:+s.lat,lng:+s.lng}, map,
         content:pinEl(si+1,c,!isCur), zIndex:isCur?100:1, title:s.name
       });
-      m.addListener('click',()=>{
+      m.__key=di+':'+si;
+      m.__openInfo=()=>{
         infoWin.setContent('<div style="font-family:inherit;padding:2px 4px"><b style="font-size:14px">'+esc(s.name)+'</b>'+
           (s.time?'<br><span style="color:#3182F6;font-weight:700;font-size:12px">'+esc(s.time)+'</span>':'')+
           (s.memo?'<br><span style="font-size:12px;color:#6B7684">'+esc(s.memo)+'</span>':'')+'</div>');
         infoWin.open({map,anchor:m});
-      });
+      };
+      m.addListener('click',m.__openInfo);
       gmapObjs.push(m);
     });
   });
+}
+/* 핀들이 흩어져 있으면 가장 밀집한 구역에 맞춰요 (멀리 떨어진 하나 때문에 지도가 넓어지지 않게) */
+function densePoints(pts){
+  if(pts.length<3)return pts;
+  const lats=pts.map(p=>+p.lat).sort((a,b)=>a-b);
+  const lngs=pts.map(p=>+p.lng).sort((a,b)=>a-b);
+  const mid=a=>a[Math.floor(a.length/2)];
+  const cLat=mid(lats), cLng=mid(lngs);
+  const km=(p)=>{
+    const dy=(+p.lat-cLat)*111;
+    const dx=(+p.lng-cLng)*111*Math.cos(cLat*Math.PI/180);
+    return Math.sqrt(dx*dx+dy*dy);
+  };
+  const near=pts.filter(p=>km(p)<=80);          // 중심에서 80km 이내
+  return near.length>=Math.max(2,Math.ceil(pts.length*0.5))?near:pts;
+}
+function fitPoints(mapObj,pts,zoomOne){
+  if(!mapObj||!pts.length)return;
+  const use=densePoints(pts);
+  if(use.length===1){
+    mapObj.setCenter({lat:+use[0].lat,lng:+use[0].lng});
+    mapObj.setZoom(zoomOne||15);
+    return;
+  }
+  const b=new GM.LatLngBounds();
+  use.forEach(p=>b.extend({lat:+p.lat,lng:+p.lng}));
+  mapObj.fitBounds(b,{top:44,bottom:44,left:44,right:44});
+}
+/* 목록 항목을 누르면 해당 핀으로 지도를 옮기고 말풍선을 열어요 */
+function focusPin(mapObj,infoObj,objs,idxOrMatch,scrollTo){
+  if(!gmapReady||!mapObj)return;
+  const m=typeof idxOrMatch==='function'?objs.find(idxOrMatch):objs[idxOrMatch];
+  if(!m||!m.position)return;
+  const p=m.position;
+  const lat=typeof p.lat==='function'?p.lat():p.lat;
+  const lng=typeof p.lng==='function'?p.lng():p.lng;
+  mapObj.setCenter({lat:+lat,lng:+lng});
+  mapObj.setZoom(16);
+  if(m.__openInfo)m.__openInfo();
+  if(scrollTo){
+    const el=document.getElementById(scrollTo);
+    if(el&&el.scrollIntoView)el.scrollIntoView({behavior:'smooth',block:'start'});
+  }
 }
 function allStops(){
   const out=[];
@@ -889,10 +952,7 @@ function fitMap(){
     map.setCenter({lat:ri[2],lng:ri[3]});map.setZoom(ri[4]);
     return;
   }
-  if(pts.length===1){map.setCenter({lat:+pts[0].lat,lng:+pts[0].lng});map.setZoom(14);return;}
-  const b=new GM.LatLngBounds();
-  pts.forEach(s=>b.extend({lat:+s.lat,lng:+s.lng}));
-  map.fitBounds(b,{top:46,bottom:46,left:46,right:46});
+  fitPoints(map,pts,15);
 }
 /* ---------- 쇼핑 태그 ---------- */
 const SHOP_TAGS=[
@@ -904,14 +964,37 @@ const SHOP_TAGS=[
   ['📚 굿즈','#00C473','📚'],
   ['🏬 잡화','#0BB8CC','🏬']
 ];
-function shopTags(){ return [...SHOP_TAGS.map(t=>t[0]), ...S.cats.shop.map(c=>'🏷️ '+c)]; }
-function tagStyle(tag){
-  const f=SHOP_TAGS.find(t=>t[0]===tag);
-  if(f)return {color:f[1],emo:f[2]};
-  const cs=['#8B95A1','#5B34E8','#E8590C','#2B8A3E'];
-  const idx=Math.max(0,shopTags().indexOf(tag));
-  return {color:cs[idx%cs.length],emo:emojiOf(tag,'🛍️')};
+const FOOD_DEFAULTS=[
+  ['🍣 일식','#F04452','🍣'],['🍝 양식','#FF9F0A','🍝'],['🍜 중식','#E8590C','🍜'],
+  ['🇰🇷 한식','#00C473','🇰🇷'],['☕ 카페','#8B5E3C','☕'],['🍰 디저트','#F35CA6','🍰'],
+  ['🍺 술집','#7048E8','🍺'],['🍽️ 기타','#4E5968','🍽️']
+];
+const TAG_COLORS=['#3182F6','#F04452','#00C473','#FF9F0A','#7048E8','#0BB8CC','#F35CA6','#8B5E3C','#E8590C','#4E5968'];
+
+/* 태그 정의(이름·이모지·색)를 편집할 수 있게 저장해요 */
+function tagDefs(kind){
+  if(!S.tagDefs)S.tagDefs={};
+  if(!S.tagDefs[kind]){
+    const base=(kind==='shop'?SHOP_TAGS:FOOD_DEFAULTS).map(t=>({label:t[0],color:t[1],emo:t[2]}));
+    const custom=((S.cats&&S.cats[kind])||[]).map((c,i)=>({label:'🏷️ '+c,color:TAG_COLORS[i%TAG_COLORS.length],emo:'🏷️'}));
+    S.tagDefs[kind]=base.concat(custom);
+  }
+  return S.tagDefs[kind];
 }
+function defOf(kind,label){ return tagDefs(kind).find(t=>t.label===label); }
+function shopTags(){ return tagDefs('shop').map(t=>t.label); }
+function addTag(kind,name){
+  const defs=tagDefs(kind);
+  const label='🏷️ '+name;
+  defs.push({label,color:TAG_COLORS[defs.length%TAG_COLORS.length],emo:'🏷️'});
+  return label;
+}
+function styleOf(kind,label,fb){
+  const d=defOf(kind,label);
+  if(d)return {color:d.color,emo:d.emo};
+  return {color:'#8B95A1',emo:emojiOf(label,fb)};
+}
+function tagStyle(tag){ return styleOf('shop',tag,'🛍️'); }
 let curShopTag='전체';
 
 /* ---------- 쇼핑 장소 지도 ---------- */
@@ -945,33 +1028,26 @@ function drawShopMap(){
     el.style.background=st.color;
     el.textContent=st.emo;
     const m=new GM.AdvancedMarkerElement({position:{lat:+p.lat,lng:+p.lng},map:shopMap,content:el,title:p.name});
-    m.addListener('click',()=>{
+    m.__key=p.id||p.name;
+    m.__openInfo=()=>{
       shopInfo.setContent('<div style="font-family:inherit;padding:2px 4px">'+
         (p.tag?'<span style="font-size:11px;font-weight:700;color:'+st.color+'">'+esc(p.tag)+'</span><br>':'')+
         '<b style="font-size:14px">'+esc(p.name)+'</b>'+
         (p.memo?'<br><span style="font-size:12px;color:#6B7684">'+esc(p.memo)+'</span>':'')+'</div>');
       shopInfo.open({map:shopMap,anchor:m});
-    });
+    };
+    m.addListener('click',m.__openInfo);
     shopObjs.push(m);
   });
-  if(pts.length===1){shopMap.setCenter({lat:+pts[0].lat,lng:+pts[0].lng});shopMap.setZoom(14);}
-  else{
-    const b=new GM.LatLngBounds();
-    pts.forEach(p=>b.extend({lat:+p.lat,lng:+p.lng}));
-    shopMap.fitBounds(b,{top:40,bottom:40,left:40,right:40});
-  }
+  fitPoints(shopMap,pts,15);
 }
 
 /* ---------- 맛집 지도 ---------- */
-const FOOD_COLORS={'🍣 일식':'#F04452','🍝 양식':'#FF9F0A','🍜 중식':'#E8590C','🇰🇷 한식':'#00C473',
-  '☕ 카페':'#8B5E3C','🍰 디저트':'#F35CA6','🍺 술집':'#7048E8','🍽️ 기타':'#4E5968'};
 function emojiOf(label,fallback){
   const first=(label||'').trim().split(' ')[0];
   return first&&!/^[A-Za-z0-9가-힣]/.test(first)?first:fallback;
 }
-function foodStyle(cat){
-  return {color:FOOD_COLORS[cat]||'#0BB8CC', emo:emojiOf(cat,'🍽️')};
-}
+function foodStyle(cat){ return styleOf('food',cat,'🍽️'); }
 let foodMap=null, foodObjs=[], foodInfo=null;
 function drawFoodMap(){
   const box=document.getElementById('foodMap');
@@ -1001,21 +1077,18 @@ function drawFoodMap(){
     el.className='tagpin';el.style.background=st.color;el.textContent=st.emo;
     if(f.done)el.style.opacity='.5';
     const m=new GM.AdvancedMarkerElement({position:{lat:+f.lat,lng:+f.lng},map:foodMap,content:el,title:f.name});
-    m.addListener('click',()=>{
+    m.__key=f.name;
+    m.__openInfo=()=>{
       foodInfo.setContent('<div style="font-family:inherit;padding:2px 4px">'+
         (f.cat?'<span style="font-size:11px;font-weight:700;color:'+st.color+'">'+esc(f.cat)+'</span><br>':'')+
         '<b style="font-size:14px">'+esc(f.name)+'</b>'+
         (f.memo?'<br><span style="font-size:12px;color:#6B7684">'+esc(f.memo)+'</span>':'')+'</div>');
       foodInfo.open({map:foodMap,anchor:m});
-    });
+    };
+    m.addListener('click',m.__openInfo);
     foodObjs.push(m);
   });
-  if(pts.length===1){foodMap.setCenter({lat:+pts[0].lat,lng:+pts[0].lng});foodMap.setZoom(14);}
-  else{
-    const b=new GM.LatLngBounds();
-    pts.forEach(f=>b.extend({lat:+f.lat,lng:+f.lng}));
-    foodMap.fitBounds(b,{top:40,bottom:40,left:40,right:40});
-  }
+  fitPoints(foodMap,pts,15);
 }
 
 /* Places 자동완성: 구글 위젯 대신 AutocompleteSuggestion API로 직접 검색·렌더
@@ -1245,6 +1318,14 @@ function renderStops(){
       </div>`;
     el.querySelector('[data-a=up]').onclick=()=>{if(i===0)return;[d.stops[i-1],d.stops[i]]=[d.stops[i],d.stops[i-1]];save();renderPlan();};
     el.querySelector('[data-a=dn]').onclick=()=>{if(i===d.stops.length-1)return;[d.stops[i+1],d.stops[i]]=[d.stops[i],d.stops[i+1]];save();renderPlan();};
+    el.querySelector('.stop-body').onclick=(ev)=>{
+      if(ev.target.closest('.stop-acts'))return;
+      if(s.lat==null){toast('위치 정보가 없어요. 수정에서 검색해 등록해 보세요');return;}
+      focusPin(map,infoWin,gmapObjs,m=>m.__key===curDay+':'+i,'map');
+    };
+    el.querySelector('.stop-dot').onclick=()=>{
+      if(s.lat!=null)focusPin(map,infoWin,gmapObjs,m=>m.__key===curDay+':'+i,'map');
+    };
     el.querySelector('[data-a=mv]').onclick=()=>moveSheet(i);
     el.querySelector('[data-a=del]').onclick=()=>{d.stops.splice(i,1);save();renderPlan();};
     el.querySelector('[data-a=ed]').onclick=()=>editStop(i);
@@ -1348,8 +1429,7 @@ const GMAP_GUIDE='<div style="font-size:12px;color:#8B95A1;line-height:1.6;backg
 
 $('#tripTitle').oninput=e=>{S.title=e.target.value;save();};
 /* ================= 맛집 ================= */
-const FOOD_CATS=['🍣 일식','🍝 양식','🍜 중식','🇰🇷 한식','☕ 카페','🍰 디저트','🍺 술집','🍽️ 기타'];
-function foodCats(){return [...FOOD_CATS, ...S.cats.food.map(c=>'🏷️ '+c)];}
+function foodCats(){ return tagDefs('food').map(t=>t.label); }
 let curFoodCat='전체';
 function renderFood(){
   /* 카테고리 필터 탭 (실제 등록된 것 + 전체) */
@@ -1363,6 +1443,12 @@ function renderFood(){
       b.onclick=()=>{curFoodCat=c;renderFood();drawFoodMap();};
       tw.appendChild(b);
     });
+  }
+  {
+    const mg=document.createElement('button');
+    mg.className='dchip';mg.textContent='⚙️';mg.style.color='var(--g400)';mg.title='종류 관리';
+    mg.onclick=()=>tagManager('food');
+    tw.appendChild(mg);
   }
   const list=curFoodCat==='전체'?S.food:S.food.filter(f=>f.cat===curFoodCat);
   const w=$('#foodList');w.innerHTML='';
@@ -1386,8 +1472,13 @@ function renderFood(){
         </div>
         <button class="row-del" data-a="del">${ICON_TRASH}</button>
       </div>`;
-    el.querySelector('[data-a=chk]').onclick=()=>{f.done=!f.done;save();renderFood();};
-    el.querySelector('[data-a=del]').onclick=()=>{S.food.splice(i,1);save();renderFood();};
+    el.onclick=(ev)=>{
+      if(ev.target.closest('button')||ev.target.closest('a'))return;
+      if(f.lat==null){toast('위치 정보가 없어요. 검색해서 다시 등록하면 지도에 표시돼요');return;}
+      focusPin(foodMap,foodInfo,foodObjs,m=>m.__key===f.name,'foodMap');
+    };
+    el.querySelector('[data-a=chk]').onclick=()=>{f.done=!f.done;save();renderFood();drawFoodMap();};
+    el.querySelector('[data-a=del]').onclick=()=>{S.food.splice(i,1);save();renderFood();drawFoodMap();};
     w.appendChild(el);
   });
 }
@@ -1409,7 +1500,7 @@ function foodForm(pre){
   `);
   let img='';
   let fcat=curFoodCat!=='전체'?curFoodCat:'🍣 일식';
-  buildCatPick($('#f-fcats'), foodCats, fcat, c=>fcat=c, v=>S.cats.food.push(v));
+  buildCatPick($('#f-fcats'), foodCats, fcat, c=>fcat=c, v=>{fcat=addTag('food',v);}, 'food');
   let flat=pre.lat!=null?pre.lat:null, flng=pre.lng!=null?pre.lng:null, faddr=pre.addr||'';
   mountAC('ac-food',p=>{
     flat=p.lat;flng=p.lng;faddr=p.addr||'';
@@ -1463,15 +1554,15 @@ function renderShop(){
       <div style="display:flex;align-items:flex-start;gap:11px">
         <button class="check ${f.done?'on':''}" data-a="chk">${ICON_CHK}</button>
         <div style="flex:1;min-width:0">
+          ${(()=>{const p=f.placeId&&S.shopPlaces.find(x=>x.id===f.placeId);
+            if(!p)return '';
+            const st=tagStyle(p.tag);
+            return `<button class="shop-tag" data-a="goplace" style="background:${st.color}1a;color:${st.color};margin:0 0 2px">${st.emo} ${esc(p.name)}</button>`;})()}
           <div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline">
             <div class="it-name" style="font-size:15.5px;font-weight:700">${esc(f.name)}</div>
             ${f.price?`<div style="font-size:13.5px;font-weight:700;color:#3182F6;flex-shrink:0">${esc(f.price)}</div>`:''}
           </div>
           ${f.memo?`<div class="memoline">${esc(f.memo)}</div>`:''}
-          ${(()=>{const p=f.placeId&&S.shopPlaces.find(x=>x.id===f.placeId);
-            if(!p)return '';
-            const st=tagStyle(p.tag);
-            return `<button class="linkchip" data-a="goplace" style="background:${st.color}1a;color:${st.color}">${st.emo} ${esc(p.name)}</button>`;})()}
           ${linksHtml(f)}
           ${f.img?`<img class="thumb" src="${f.img}" alt="">`:''}
         </div>
@@ -1507,6 +1598,12 @@ function renderShop(){
       stw.appendChild(b);
     });
   }else{ curShopTag='전체'; }
+  {
+    const mg=document.createElement('button');
+    mg.className='dchip';mg.textContent='⚙️';mg.style.color='var(--g400)';mg.title='태그 관리';
+    mg.onclick=()=>tagManager('shop');
+    stw.appendChild(mg);
+  }
 
   const pw=$('#shopPlaceList');pw.innerHTML='';
   if(!S.shopPlaces.length){pw.innerHTML='<div class="card"><div class="empty"><span class="emo">🏬</span>쇼핑 장소가 아직 없어요<br>돈키호테, 편집숍… 갈 곳을 적어두세요</div></div>';}
@@ -1520,12 +1617,14 @@ function renderShop(){
       <div style="display:flex;align-items:flex-start;gap:11px">
         <div style="width:36px;height:36px;border-radius:12px;background:${f.tag?st.color+'1a':'var(--g50)'};display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0">${f.tag?st.emo:'🏬'}</div>
         <div style="flex:1;min-width:0">
-          ${f.tag?`<div class="shop-tag" style="background:${st.color}1a;color:${st.color}">${esc(f.tag)}</div>`:''}
+          <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:2px">
+            ${f.tag?`<span class="shop-tag" style="background:${st.color}1a;color:${st.color};margin:0">${esc(f.tag)}</span>`:''}
+            ${(()=>{const items=S.shopItems.filter(x=>x.placeId===f.id);
+              if(!items.length)return '';
+              const left=items.filter(x=>!x.done).length;
+              return `<button class="shop-tag" data-a="goitems" style="background:var(--g50);color:var(--g500);margin:0">🛍️ ${items.length}개${left?` · ${left} 남음`:' 완료'}</button>`;})()}
+          </div>
           <div style="font-size:15.5px;font-weight:700">${esc(f.name)}</div>
-          ${(()=>{const items=S.shopItems.filter(x=>x.placeId===f.id);
-            if(!items.length)return '';
-            const left=items.filter(x=>!x.done).length;
-            return `<button class="linkchip" data-a="goitems">🛍️ 살 것 ${items.length}개${left?` · ${left}개 남음`:' · 모두 완료'}</button>`;})()}
           ${f.addr?`<div class="stop-addr">${esc(f.addr)}</div>`:''}
           ${f.memo?`<div class="memoline">${esc(f.memo)}</div>`:''}
           ${linksHtml(f)}
@@ -1536,6 +1635,11 @@ function renderShop(){
           <button class="mini" data-a="del">${ICON_TRASH}</button>
         </div>
       </div>`;
+    el.onclick=(ev)=>{
+      if(ev.target.closest('button'))return;
+      if(f.lat==null){toast('위치 정보가 없어요. 수정에서 검색해 등록해 보세요');return;}
+      focusPin(shopMap,shopInfo,shopObjs,m=>m.__key===(f.id||f.name),'shopMap');
+    };
     const gi=el.querySelector('[data-a=goitems]');
     if(gi)gi.onclick=()=>{ document.querySelector('[data-shopseg="items"]').click(); toast(esc(f.name)+'에서 살 것들이에요'); };
     el.querySelector('[data-a=ed]').onclick=()=>shopForm('place',i);
@@ -1600,7 +1704,7 @@ function shopForm(kind,idx){
     drawPlaces();
   }
   if(!isItem){
-    buildCatPick($('#f-stags'), shopTags, tag, c=>tag=c, v=>S.cats.shop.push(v));
+    buildCatPick($('#f-stags'), shopTags, tag, c=>tag=c, v=>{tag=addTag('shop',v);}, 'shop');
     mountAC('ac-shop',p=>{
       plat=p.lat;plng=p.lng;paddr=p.addr||'';
       $('#f-name').value=p.name;
@@ -1654,16 +1758,119 @@ const CATS=[['🍽️','식비'],['🛍️','쇼핑'],['🚕','교통'],['🏨',
 function budgetCats(){return [...CATS.map(c=>c[1]), ...S.cats.budget];}
 function catIcon(c){const f=CATS.find(x=>x[1]===c);return f?f[0]:'🏷️';}
 /* 공용: 카테고리 선택 UI (＋ 버튼으로 직접 추가) */
-function buildCatPick(box, getCats, selected, onSelect, onAddSave){
+/* 태그 편집: 이름·이모지·색을 바꾸고, 사용 중인 항목에도 반영해요 */
+const EMOJI_SET=['👕','👟','👜','🎰','🧸','🎮','💄','🧴','🍫','🍜','🍣','🍰','☕','🍺','📚','💿','🏬','🎁','🛍️','⭐','🏷️','🍝','🍔','🥐','🍦','🐟','🥩','🌸'];
+function tagManager(kind,onDone){
+  const title=kind==='shop'?'쇼핑 태그 관리':'맛집 종류 관리';
+  openSheet(title,'<div id="tm-list"></div>'+
+    '<button class="btn btn-grey" id="tm-add" style="margin-top:4px">＋ 새 태그 만들기</button>'+
+    '<button class="btn btn-blue" id="tm-close" style="margin-top:8px">완료</button>');
+  const box=$('#tm-list');
+  const usedCount=(label)=>kind==='shop'
+    ? S.shopPlaces.filter(p=>p.tag===label).length
+    : S.food.filter(f=>f.cat===label).length;
+  const draw=()=>{
+    box.innerHTML='';
+    tagDefs(kind).forEach((d,i)=>{
+      const row=document.createElement('div');
+      row.style.cssText='background:var(--g25);border-radius:12px;padding:11px;margin-bottom:8px';
+      const cnt=usedCount(d.label);
+      row.innerHTML=
+        '<div style="display:flex;align-items:center;gap:9px;margin-bottom:9px">'+
+          '<span class="tagpin" style="background:'+d.color+';width:32px;height:32px;flex-shrink:0">'+d.emo+'</span>'+
+          '<input class="tm-name" value="'+esc(d.name||d.label.replace(d.emo,'').trim())+'" maxlength="10" '+
+            'style="flex:1;font-size:14.5px;font-weight:700;background:#fff;border-radius:9px;padding:8px 10px;min-width:0">'+
+          '<button class="row-del tm-del">'+ICON_TRASH+'</button>'+
+        '</div>'+
+        '<div class="tm-emos" style="display:flex;gap:4px;overflow-x:auto;padding-bottom:7px;scrollbar-width:none"></div>'+
+        '<div class="tm-cols" style="display:flex;gap:6px;flex-wrap:wrap"></div>'+
+        (cnt?'<div style="font-size:11.5px;color:var(--g400);font-weight:600;padding-top:7px">'+cnt+'곳에서 사용 중</div>':'');
+      /* 이모지 선택 */
+      const eb=row.querySelector('.tm-emos');
+      EMOJI_SET.forEach(e=>{
+        const b=document.createElement('button');
+        b.textContent=e;
+        b.style.cssText='flex-shrink:0;width:30px;height:30px;border-radius:9px;font-size:16px;background:'+(e===d.emo?'var(--g900)':'#fff');
+        b.onclick=()=>{ renameTag(kind,i,{emo:e}); draw(); };
+        eb.appendChild(b);
+      });
+      /* 색 선택 */
+      const cb=row.querySelector('.tm-cols');
+      TAG_COLORS.forEach(c=>{
+        const b=document.createElement('button');
+        b.style.cssText='width:22px;height:22px;border-radius:50%;background:'+c+
+          ';border:'+(c===d.color?'3px solid var(--g900)':'2px solid #fff')+';box-shadow:0 1px 3px rgba(2,32,71,.2)';
+        b.onclick=()=>{ renameTag(kind,i,{color:c}); draw(); };
+        cb.appendChild(b);
+      });
+      /* 이름 변경 */
+      const ni=row.querySelector('.tm-name');
+      ni.onchange=()=>{ const v=ni.value.trim(); if(v)renameTag(kind,i,{name:v}); draw(); };
+      /* 삭제 */
+      row.querySelector('.tm-del').onclick=()=>{
+        if(cnt){ toast(cnt+'곳에서 쓰는 중이라 지울 수 없어요'); return; }
+        tagDefs(kind).splice(i,1); save(); draw();
+      };
+      box.appendChild(row);
+    });
+  };
+  draw();
+  $('#tm-add').onclick=()=>{
+    const defs=tagDefs(kind);
+    defs.push({label:'🏷️ 새 태그',name:'새 태그',emo:'🏷️',color:TAG_COLORS[defs.length%TAG_COLORS.length]});
+    save();draw();
+    box.lastChild.querySelector('.tm-name').focus();
+  };
+  $('#tm-close').onclick=()=>{
+    closeSheet();
+    if(kind==='shop'){renderShop();drawShopMap();}else{renderFood();drawFoodMap();}
+    if(onDone)onDone();
+  };
+}
+/* 태그 정의를 바꾸고, 그 태그를 쓰던 항목들의 라벨도 함께 갱신해요 */
+function renameTag(kind,idx,patch){
+  const defs=tagDefs(kind);
+  const d=defs[idx];
+  const oldLabel=d.label;
+  if(patch.emo!==undefined)d.emo=patch.emo;
+  if(patch.color!==undefined)d.color=patch.color;
+  if(patch.name!==undefined)d.name=patch.name;
+  const nm=d.name||oldLabel.replace(d.emo,'').trim();
+  d.name=nm;
+  const newLabel=d.emo+' '+nm;
+  if(newLabel!==oldLabel){
+    if(defs.some((x,i)=>i!==idx&&x.label===newLabel)){ toast('같은 이름의 태그가 있어요'); return; }
+    d.label=newLabel;
+    if(kind==='shop'){
+      S.shopPlaces.forEach(p=>{ if(p.tag===oldLabel)p.tag=newLabel; });
+      if(curShopTag===oldLabel)curShopTag=newLabel;
+    }else{
+      S.food.forEach(f=>{ if(f.cat===oldLabel)f.cat=newLabel; });
+      if(curFoodCat===oldLabel)curFoodCat=newLabel;
+    }
+  }
+  save();
+}
+
+function buildCatPick(box, getCats, selected, onSelect, onAddSave, tagKind){
   const draw=()=>{
     box.innerHTML='';
     getCats().forEach(c=>{
       const b=document.createElement('button');
       b.textContent=(catIconFor(box,c)?catIconFor(box,c)+' ':'')+c;
-      if(c===selected)b.classList.add('on');
+      if(c===selected){
+        b.classList.add('on');
+        if(tagKind){const st=styleOf(tagKind,c);b.style.background=st.color;}
+      }
       b.onclick=()=>{selected=c;onSelect(c);draw();};
       box.appendChild(b);
     });
+    if(tagKind){
+      const mg=document.createElement('button');
+      mg.textContent='⚙️ 태그 관리';mg.style.color='var(--g500)';
+      mg.onclick=()=>tagManager(tagKind,()=>{draw();});
+      box.appendChild(mg);
+    }
     const plus=document.createElement('button');
     plus.textContent='＋ 추가';plus.style.color='#3182F6';plus.style.background='#E8F3FF';
     plus.onclick=()=>{
@@ -1677,8 +1884,11 @@ function buildCatPick(box, getCats, selected, onSelect, onAddSave){
       const commit=()=>{
         const v=inp.value.trim();
         if(!v){draw();return;}
-        if(getCats().includes(v)){toast('이미 있는 카테고리예요');return;}
-        onAddSave(v);selected=v;onSelect(v);save();draw();
+        if(getCats().includes(v)||getCats().includes('🏷️ '+v)){toast('이미 있는 이름이에요');return;}
+        const r=onAddSave(v);
+        selected=tagKind?('🏷️ '+v):v;
+        if(typeof r==='string')selected=r;
+        onSelect(selected);save();draw();
       };
       row.querySelector('#newcatOk').onclick=commit;
       inp.onkeydown=e=>{if(e.key==='Enter')commit();};
@@ -2118,6 +2328,17 @@ function addTripSwitcher(){
   b.onclick=()=>{ if(cloudOn()){ try{localStorage.removeItem(LASTKEY);}catch(e){} history.replaceState(null,'',location.pathname); showTripList(); } };
   if(cloudOn()) bar.appendChild(b);
 }
+
+/* 지도 되돌리기 버튼 */
+$('#planRecenter').onclick=()=>fitMap();
+$('#shopRecenter').onclick=()=>{
+  const listed=curShopTag==='전체'?S.shopPlaces:S.shopPlaces.filter(p=>p.tag===curShopTag);
+  fitPoints(shopMap,listed.filter(p=>p.lat!=null),15);
+};
+$('#foodRecenter').onclick=()=>{
+  const listed=curFoodCat==='전체'?S.food:S.food.filter(f=>f.cat===curFoodCat);
+  fitPoints(foodMap,listed.filter(f=>f.lat!=null),15);
+};
 
 /* ---------- 시작 ---------- */
 let booted=false;
