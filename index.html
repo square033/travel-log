@@ -354,7 +354,7 @@ const GMAPS_KEY = 'AIzaSyBUinLaJzkk7MEAdQHbF4sUDrOylQk3STI';   // ← 여기에 
 
 let map=null, gmapObjs=[], infoWin=null, gmapReady=false, acQueue=[];
 function loadGmaps(){
-  if(!GMAPS_KEY||GMAPS_KEY==='YOUR_API_KEY_HERE'){mapOff('API 키를 넣으면 구글 지도가 나와요','파일 상단 GMAPS_KEY에 키를 붙여넣어 주세요');return;}
+  if(!GMAPS_KEY||GMAPS_KEY==='AIzaSyBUinLaJzkk7MEAdQHbF4sUDrOylQk3STI'){mapOff('API 키를 넣으면 구글 지도가 나와요','파일 상단 GMAPS_KEY에 키를 붙여넣어 주세요');return;}
   window.__gmInit=()=>{
     gmapReady=true;
     map=new google.maps.Map($('#map'),{
