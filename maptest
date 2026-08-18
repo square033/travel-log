@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>구글맵 키 진단</title>
+<style>
+  body{font-family:system-ui,-apple-system,sans-serif;margin:0;padding:16px;background:#F2F4F6;color:#191F28}
+  h1{font-size:18px;margin:0 0 12px}
+  #log{background:#191F28;color:#0f0;font-family:ui-monospace,monospace;font-size:12px;
+       padding:12px;border-radius:10px;white-space:pre-wrap;line-height:1.6;margin-bottom:12px}
+  #log .bad{color:#ff6b6b}
+  #map{height:320px;border-radius:12px;background:#fff}
+  input{width:100%;padding:12px;border:1px solid #D1D6DB;border-radius:10px;font-size:15px;margin-bottom:8px;box-sizing:border-box}
+  button{width:100%;padding:13px;border:none;border-radius:10px;background:#3182F6;color:#fff;font-size:15px;font-weight:700}
+</style>
+</head>
+<body>
+<h1>구글맵 키 진단</h1>
+<input id="key" placeholder="AIza로 시작하는 API 키를 붙여넣으세요" autocapitalize="off" spellcheck="false">
+<button id="go">이 키로 지도 테스트</button>
+<div id="log" style="margin-top:12px">키를 입력하고 버튼을 누르세요.</div>
+<div id="map"></div>
+
+<script>
+const log=(m,bad)=>{const el=document.getElementById('log');
+  el.innerHTML+=(el.innerHTML?'\n':'')+(bad?'<span class="bad">'+m+'</span>':m);};
+
+const CODES={
+  ApiNotActivatedMapError:'▶ Maps JavaScript API가 활성화되지 않았습니다.\n  콘솔 → API 및 서비스 → 라이브러리 → Maps JavaScript API → 사용',
+  ApiTargetBlockedMapError:'▶ 이 키의 "API 제한사항"이 Maps JavaScript API를 막고 있습니다.\n  키 편집 → API 제한사항에 Maps JavaScript API 추가',
+  RefererNotAllowedMapError:'▶ 현재 주소가 키에 등록되지 않았습니다.\n  키 편집 → 웹사이트 제한에 다음을 추가: '+location.origin+'/*',
+  InvalidKeyMapError:'▶ 키 값이 잘못되었습니다. 공백이나 오타를 확인하세요.',
+  BillingNotEnabledMapError:'▶ 결제 계정이 연결되지 않았습니다.\n  콘솔 → 결제 → 결제 계정 연결 (무료 한도 내 청구 없음)',
+  ExpiredKeyMapError:'▶ 만료된 키입니다.',
+  MissingKeyMapError:'▶ 키가 전달되지 않았습니다.'
+};
+
+// 구글이 콘솔에만 찍는 에러를 화면으로
+const oe=console.error.bind(console);
+console.error=(...a)=>{const m=a.join(' ');
+  let hit=false;
+  for(const k in CODES){ if(m.includes(k)){ log('❌ '+k,true); log(CODES[k],true); hit=true; } }
+  if(!hit && m.toLowerCase().includes('google')) log('❌ '+m,true);
+  oe(...a);};
+
+window.gm_authFailure=()=>log('❌ 인증 실패(gm_authFailure): 키 또는 제한 설정 문제',true);
+
+document.getElementById('go').onclick=()=>{
+  const key=document.getElementById('key').value.trim();
+  if(!key){log('키를 입력하세요',true);return;}
+  document.getElementById('log').innerHTML='';
+  log('현재 주소: '+location.origin);
+  log('키 앞 8자리: '+key.slice(0,8)+'…  (길이 '+key.length+')');
+  log('스크립트 요청 중…');
+
+  window.__init=async()=>{
+    log('✅ 스크립트 로드 성공');
+    try{
+      const {Map}=await google.maps.importLibrary('maps');
+      new Map(document.getElementById('map'),{center:{lat:33.59,lng:130.40},zoom:12});
+      log('✅ 지도 생성 성공 — 키와 Maps JavaScript API는 정상입니다');
+    }catch(e){ log('❌ 지도 생성 실패: '+e.message,true); }
+    try{
+      await google.maps.importLibrary('places');
+      const has=!!(google.maps.places&&google.maps.places.PlaceAutocompleteElement);
+      log(has?'✅ Places (New) 자동완성 사용 가능':'❌ PlaceAutocompleteElement 없음 → Places API (New) 활성화 필요',!has);
+    }catch(e){ log('❌ Places 라이브러리 실패: '+e.message+'\n  → Places API (New)를 활성화하세요',true); }
+  };
+
+  const s=document.createElement('script');
+  s.src='https://maps.googleapis.com/maps/api/js?key='+encodeURIComponent(key)+
+        '&libraries=maps,marker,places&loading=async&v=weekly&callback=__init';
+  s.async=true;
+  s.onerror=()=>log('❌ 스크립트 자체를 불러오지 못했습니다 (네트워크/차단기 확인)',true);
+  document.head.appendChild(s);
+  setTimeout(()=>{ if(!window.google) log('❌ 8초간 응답 없음 — 위 에러 메시지를 확인하세요',true); },8000);
+};
+</script>
+</body>
+</html>
