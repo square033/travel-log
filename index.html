@@ -468,7 +468,51 @@ let S={
 let curDay=0, curDocCat='전체', curShopSeg='items', curExpWho='all';
 let memOnly=false;
 
-/* ===== Supabase 설정 ===== */
+/* ===== Supabase 설정 =====
+   1) supabase.com 프로젝트 생성 → SQL Editor에 아래 전체 실행:
+
+create extension if not exists pgcrypto;
+
+create table trips (
+  code text primary key,
+  data jsonb default '{}'::jsonb,
+  owner_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
+  join_secret text not null default encode(gen_random_bytes(8),'hex'),
+  updated_at timestamptz default now()
+);
+create table trip_members (
+  code text not null references trips(code) on delete cascade,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  primary key (code, user_id)
+);
+alter table trips enable row level security;
+alter table trip_members enable row level security;
+
+create or replace function is_member(t text) returns boolean
+language sql security definer stable as $$
+  select exists(select 1 from trip_members m where m.code=t and m.user_id=auth.uid());
+$$;
+
+create policy "trip read"   on trips for select using (owner_id=auth.uid() or is_member(code));
+create policy "trip insert" on trips for insert with check (owner_id=auth.uid());
+create policy "trip update" on trips for update using (owner_id=auth.uid() or is_member(code));
+create policy "trip delete" on trips for delete using (owner_id=auth.uid());
+create policy "mem read"    on trip_members for select using (user_id=auth.uid());
+create policy "mem leave"   on trip_members for delete using (user_id=auth.uid());
+
+create or replace function join_trip(p_code text, p_secret text) returns boolean
+language plpgsql security definer as $$
+begin
+  if not exists(select 1 from trips where code=p_code and join_secret=p_secret) then
+    return false;
+  end if;
+  insert into trip_members(code,user_id) values(p_code,auth.uid()) on conflict do nothing;
+  return true;
+end; $$;
+
+   2) Authentication → Sign In / Providers → Email 에서
+      "Confirm email" 끄기 (아이디 로그인이라 인증메일이 필요 없어요)
+   3) Settings → API 에서 아래 두 값 붙여넣기                       */
 const SUPABASE_URL = 'https://hmodjglzhubvvqlygdfl.supabase.co';      // 예: https://abcd.supabase.co
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhtb2RqZ2x6aHVidnZxbHlnZGZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwNTA3MDksImV4cCI6MjEwMjYyNjcwOX0.9-bmgGi5ECizgIgRmujCudjkXh4_mA5zEslvisnd_EE'; 
 
@@ -1160,7 +1204,8 @@ async function mountAC(boxId,cb){
               addr:place.formattedAddress||sub,
               lat:typeof loc.lat==='function'?loc.lat():loc.lat,
               lng:typeof loc.lng==='function'?loc.lng():loc.lng,
-              gmap:place.id?('https://www.google.com/maps/place/?q=place_id:'+place.id):''});
+              pid:place.id||'',
+              gmap:place.id?('https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(place.displayName||main)+'&query_place_id='+place.id):''});
           res.innerHTML='';inp.value='';clr.style.display='none';token=null;
         }catch(e){ res.innerHTML='<div class="searching">장소 정보를 가져오지 못했어요: '+esc(e.message||'')+'</div>'; }
       };
@@ -1344,7 +1389,6 @@ function renderStops(){
             ${s.memo?`<div class="memoline">${esc(s.memo)}</div>`:''}
           </div>
           <div class="stop-acts">
-            ${gmapHref(s)?`<button class="mini gmapmini" data-a="gmap" title="구글맵으로 열기">${ICON_MAP}</button>`:''}
             <button class="mini" data-a="up">${ICON_UP}</button>
             <button class="mini" data-a="dn">${ICON_DN}</button>
             <button class="mini" data-a="mv"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M14 4h5v5M19 4l-7 7M10 20H5v-5M5 20l7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
@@ -1363,8 +1407,7 @@ function renderStops(){
     el.querySelector('.stop-dot').onclick=()=>{
       if(s.lat!=null)focusPin(map,infoWin,gmapObjs,m=>m.__key===curDay+':'+i,'map');
     };
-    const gb=el.querySelector('[data-a=gmap]');
-    if(gb)gb.onclick=(ev)=>{ev.stopPropagation();window.open(gmapHref(s),'_blank','noopener');};
+
     el.querySelector('[data-a=mv]').onclick=()=>moveSheet(i);
     el.querySelector('[data-a=del]').onclick=()=>{d.stops.splice(i,1);save();renderPlan();};
     el.querySelector('[data-a=ed]').onclick=()=>editStop(i);
@@ -1396,7 +1439,7 @@ function stopForm(place, editIdx=null){
     <div class="field"><span class="lab">메모</span><textarea id="f-memo" rows="2" placeholder="예: 예약 필수, 3번 출구">${esc(s.memo||'')}</textarea></div>
     <button class="btn btn-blue" id="f-save">Day ${curDay+1}에 ${editIdx!=null?'저장':'추가'}</button>
   `);
-  let lat=s.lat!=null?s.lat:null, lng=s.lng!=null?s.lng:null;
+  let lat=s.lat!=null?s.lat:null, lng=s.lng!=null?s.lng:null, pid=s.pid||'';
   let targetDay=curDay;
   const dbox=$('#f-days');
   const drawDays=()=>{
@@ -1413,7 +1456,7 @@ function stopForm(place, editIdx=null){
   drawDays();
   $('#f-search').onclick=()=>openGmapSearch($('#f-name').value.trim());
   mountAC('ac-stop',p=>{
-    lat=p.lat;lng=p.lng;
+    lat=p.lat;lng=p.lng;pid=p.pid||'';
     $('#f-name').value=p.name;
     if(p.gmap)$('#f-gmap').value=p.gmap;
     const st=$('#f-pinstate');
@@ -1545,10 +1588,10 @@ function foodForm(pre,idx){
     '<button class="btn btn-blue" id="f-save">'+(edit?'저장하기':'맛집 리스트에 추가')+'</button>');
   let img=o.img||'';
   let fcat=o.cat||(curFoodCat!=='전체'?curFoodCat:foodCats()[0]);
-  let flat=o.lat!=null?o.lat:null, flng=o.lng!=null?o.lng:null, faddr=o.addr||'';
+  let flat=o.lat!=null?o.lat:null, flng=o.lng!=null?o.lng:null, faddr=o.addr||'', fpid=o.pid||'';
   buildCatPick($('#f-fcats'), foodCats, fcat, c=>fcat=c, v=>{fcat=addTag('food',v);}, 'food');
   mountAC('ac-food',p=>{
-    flat=p.lat;flng=p.lng;faddr=p.addr||'';
+    flat=p.lat;flng=p.lng;faddr=p.addr||'';fpid=p.pid||'';
     $('#f-name').value=p.name;
     if(p.gmap)$('#f-gmap').value=p.gmap;
     const st=$('#f-pinstate');
@@ -1560,7 +1603,7 @@ function foodForm(pre,idx){
     const name=$('#f-name').value.trim();if(!name){toast('가게 이름을 입력해 주세요');return;}
     const gmapUrl=normLink($('#f-gmap').value);
     if(flat==null){ const c=parseGmap(gmapUrl); if(c){flat=c.lat;flng=c.lng;} }
-    const obj={name, cat:fcat, lat:flat, lng:flng, addr:faddr,
+    const obj={name, cat:fcat, lat:flat, lng:flng, addr:faddr, pid:fpid,
       gmap:gmapUrl, gshort:normLink($('#f-gshort').value),
       link:normLink($('#f-link').value),
       memo:$('#f-memo').value.trim(), img, done:edit?!!o.done:false};
@@ -1592,13 +1635,23 @@ function linksHtml(o){
     ls.map(u=>'<a class="linkline" href="'+esc(u)+'" target="_blank" rel="noopener">'+ICON_LINK+'<span>'+esc(hostOf(u))+'</span></a>').join('')+'</div>';
 }
 /* 구글맵으로 이동하는 링크: 공유 링크(gshort)가 있으면 우선, 없으면 지도용 링크 */
-function gmapHref(o){ return (o&&(o.gshort||o.gmap))||''; }
+function gmapHref(o){ return mapsUrlFor(o); }
 /* 지도 말풍선: 오른쪽에 구글맵으로 이동하는 버튼을 붙여요 */
+/* 저장된 링크에서 place_id만 뽑아내요 */
+function placeIdOf(o){
+  if(!o)return '';
+  if(o.pid)return o.pid;
+  const m=(o.gmap||'').match(/place_id[:=]([\w-]+)/);
+  return m?m[1]:'';
+}
+/* 구글맵 앱으로 바로 열리는 짧은 주소를 만들어요 */
 function mapsUrlFor(o){
-  const u=gmapHref(o);
-  if(u)return u;
-  if(o&&o.lat!=null)return 'https://www.google.com/maps/search/?api=1&query='+o.lat+','+o.lng;
-  return 'https://www.google.com/maps/search/'+encodeURIComponent((o&&o.name)||'');
+  if(o&&o.gshort)return o.gshort;                     // 직접 넣은 공유 링크가 최우선
+  const name=encodeURIComponent((o&&o.name)||'');
+  const pid=placeIdOf(o);
+  if(pid)return 'https://www.google.com/maps/search/?api=1&query='+name+'&query_place_id='+pid;
+  if(o&&o.lat!=null)return 'https://maps.google.com/?q='+o.lat+','+o.lng;
+  return 'https://maps.google.com/?q='+name;
 }
 function infoHtml(o,label,color,sub){
   return '<div style="font-family:inherit;display:flex;align-items:flex-start;gap:10px;padding:3px 2px;min-width:170px">'+
@@ -1738,7 +1791,7 @@ function shopForm(kind,idx){
   let links=linksOf(o).slice();
   if(!links.length)links=[''];
   let img=o.img||'';
-  let plat=o.lat!=null?o.lat:null, plng=o.lng!=null?o.lng:null, paddr=o.addr||'';
+  let plat=o.lat!=null?o.lat:null, plng=o.lng!=null?o.lng:null, paddr=o.addr||'', ppid=o.pid||'';
   let tag=o.tag||(curShopTag!=='전체'?curShopTag:SHOP_TAGS[0][0]);
   openSheet((edit?'수정':'추가')+' · '+(isItem?'살 것':'쇼핑 장소'),
     (isItem?'':'<div class="acbox" id="ac-shop"></div>')+
@@ -1787,7 +1840,7 @@ function shopForm(kind,idx){
   if(!isItem){
     buildCatPick($('#f-stags'), shopTags, tag, c=>tag=c, v=>{tag=addTag('shop',v);}, 'shop');
     mountAC('ac-shop',p=>{
-      plat=p.lat;plng=p.lng;paddr=p.addr||'';
+      plat=p.lat;plng=p.lng;paddr=p.addr||'';ppid=p.pid||'';
       $('#f-name').value=p.name;
       const st=$('#f-pin');st.textContent='✓ '+(p.addr||'위치를 찾았어요')+' — 지도에 표시돼요';st.style.color='#00A661';
       if(p.gmap&&!links.filter(Boolean).length){links[0]=p.gmap;drawLinks();}
@@ -1821,7 +1874,7 @@ function shopForm(kind,idx){
       img, done:edit?!!o.done:false};
     if(!isItem){
       if(plat==null){ for(const u of obj.links){ const c=parseGmap(u); if(c){plat=c.lat;plng=c.lng;break;} } }
-      obj.lat=plat; obj.lng=plng; obj.tag=tag; obj.addr=paddr;
+      obj.lat=plat; obj.lng=plng; obj.tag=tag; obj.addr=paddr; obj.pid=ppid;
       obj.id=o.id||('p'+Math.random().toString(36).slice(2,9));
       const gs=$('#f-gshort'); obj.gshort=gs?normLink(gs.value):(o.gshort||'');
     }else{
