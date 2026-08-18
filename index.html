@@ -77,7 +77,13 @@ a{color:var(--blue);text-decoration:none}
 #map{height:44vh;min-height:300px;border-radius:var(--r-lg);margin-bottom:14px;z-index:1;box-shadow:0 1px 3px rgba(2,32,71,.06)}
 .daychips{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 12px;scrollbar-width:none}
 .daychips::-webkit-scrollbar{display:none}
-.dchip{flex-shrink:0;padding:9px 16px;border-radius:999px;background:var(--white);color:var(--g500);font-size:14px;font-weight:700;box-shadow:0 1px 2px rgba(2,32,71,.05);transition:all .15s}
+.dchip{flex-shrink:0;padding:8px 15px;border-radius:16px;background:var(--white);color:var(--g500);font-size:14px;font-weight:700;box-shadow:0 1px 2px rgba(2,32,71,.05);transition:all .15s;line-height:1.25;text-align:center}
+.dchip .dd{display:block;font-size:10.5px;font-weight:600;opacity:.62;margin-top:1px}
+.day-head .dsub{font-size:12.5px;font-weight:600;color:var(--g400);margin-top:2px}
+.moveday{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}
+.moveday button{padding:8px 13px;border-radius:999px;background:var(--g50);font-size:13.5px;font-weight:700;color:var(--g500);line-height:1.3}
+.moveday button.on{background:var(--g900);color:#fff}
+.moveday button .dd{display:block;font-size:10px;font-weight:600;opacity:.6}
 .dchip.on{background:var(--g900);color:#fff}
 .dchip.plus{color:var(--blue);background:var(--blue-bg);box-shadow:none}
 .stop{display:flex;gap:12px;position:relative}
@@ -149,6 +155,8 @@ a{color:var(--blue);text-decoration:none}
 #map .map-off{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:#fff;border-radius:var(--r-lg);color:var(--g400);font-size:13.5px;font-weight:600;text-align:center;line-height:1.6;padding:20px}
 #map .map-off .emo{font-size:32px}
 .gm-style{font-family:inherit!important}
+.acbox{margin-bottom:10px;--gmp-mat-color-surface:#fff}
+.acbox gmp-place-autocomplete{width:100%;border-radius:12px;overflow:hidden}
 .pac-container{z-index:3005!important;border-radius:14px;border:none;box-shadow:0 8px 24px rgba(2,32,71,.16);margin-top:6px;font-family:inherit;padding:4px}
 .pac-item{border:none;padding:10px 12px;border-radius:10px;font-size:13px;color:var(--g500);cursor:pointer}
 .pac-item:hover,.pac-item-selected{background:var(--g50)}
@@ -185,6 +193,7 @@ a{color:var(--blue);text-decoration:none}
   <div class="topbar">
     <input class="title-edit" id="tripTitle" placeholder="여행 이름 ✈️" maxlength="30">
     <div class="sub" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <button id="dateBtn" class="sharebtn" style="background:var(--g50);color:var(--g500)">여행 날짜</button>
       <span id="syncState" class="sync">연결 중…</span>
       <button id="shareBtn" class="sharebtn">링크 공유</button>
     </div>
@@ -365,7 +374,7 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
 const cloudOn = ()=>SUPABASE_URL.startsWith('http') && SUPABASE_KEY.length>20;
 /* 아이디 → 내부 이메일, 짧은 비번은 자동 패딩 (4자리도 가능) */
-const ID_DOMAIN='@example.com', PW_PAD='::tripmate-9f2a';
+const ID_DOMAIN='@example.com', PW_PAD='::tripmate-9f2a';  // .local 등 예약 TLD는 Supabase가 거부해요
 const toEmail=id=>id.trim().toLowerCase().replace(/[^a-z0-9._-]/g,'')+ID_DOMAIN;
 const toPw=pw=>pw+PW_PAD;
 const fromEmail=e=>(e||'').replace(ID_DOMAIN,'');
@@ -624,8 +633,9 @@ function loadGmaps(){
     acQueue.forEach(f=>f());acQueue=[];
     drawMap();fitMap();
   };
+  window.gm_authFailure=()=>mapOff('구글맵 인증에 실패했어요','키 제한(리퍼러) 설정이나 결제 계정 연결을 확인해 주세요');
   const sc=document.createElement('script');
-  sc.src=`https://maps.googleapis.com/maps/api/js?key=${GMAPS_KEY}&libraries=places&language=ko&region=KR&callback=__gmInit`;
+  sc.src=`https://maps.googleapis.com/maps/api/js?key=${GMAPS_KEY}&libraries=places&language=ko&region=KR&loading=async&v=weekly&callback=__gmInit`;
   sc.async=true;
   sc.onerror=()=>mapOff('지도를 불러오지 못했어요','깃페이지에 올린 뒤 열면 정상 표시돼요. (미리보기 환경은 외부 스크립트가 차단돼요)');
   document.head.appendChild(sc);
@@ -670,29 +680,103 @@ function fitMap(){
   pts.forEach(s=>b.extend({lat:+s.lat,lng:+s.lng}));
   map.fitBounds(b,{top:46,bottom:46,left:46,right:46});
 }
-/* Places Autocomplete를 입력창에 부착 */
-function attachAC(input,cb){
-  const go=()=>{
-    const ac=new google.maps.places.Autocomplete(input,{fields:['name','geometry','place_id','formatted_address']});
-    ac.addListener('place_changed',()=>{
-      const p=ac.getPlace();
-      if(!p.geometry)return;
-      cb({name:p.name||input.value,
-          addr:p.formatted_address||'',
-          lat:p.geometry.location.lat(),
-          lng:p.geometry.location.lng(),
-          gmap:p.place_id?('https://www.google.com/maps/place/?q=place_id:'+p.place_id):''});
-    });
+/* Places 자동완성 (2025년 신규 방식: PlaceAutocompleteElement)
+   ※ 콘솔에서 "Places API (New)"가 활성화돼 있어야 해요 */
+let acEl=null;
+async function mountAC(boxId,cb){
+  const box=document.getElementById(boxId);
+  if(!box)return;
+  const go=async()=>{
+    try{
+      const {PlaceAutocompleteElement}=await google.maps.importLibrary('places');
+      const el=new PlaceAutocompleteElement({});
+      el.style.width='100%';
+      el.setAttribute('placeholder','장소 이름으로 검색');
+      box.innerHTML='';box.appendChild(el);acEl=el;
+      const onPick=async(ev)=>{
+        try{
+          const pred=ev.placePrediction||(ev.detail&&ev.detail.placePrediction);
+          if(!pred)return;
+          const place=pred.toPlace();
+          await place.fetchFields({fields:['displayName','formattedAddress','location','id']});
+          const loc=place.location;
+          cb({name:place.displayName||'',
+              addr:place.formattedAddress||'',
+              lat:typeof loc.lat==='function'?loc.lat():loc.lat,
+              lng:typeof loc.lng==='function'?loc.lng():loc.lng,
+              gmap:place.id?('https://www.google.com/maps/place/?q=place_id:'+place.id):''});
+        }catch(e){ toast('장소 정보를 가져오지 못했어요'); }
+      };
+      el.addEventListener('gmp-select',onPick);
+      el.addEventListener('gmp-placeselect',onPick);
+    }catch(e){
+      box.innerHTML='<div style="font-size:12.5px;color:#F04452;font-weight:600;padding:2px 4px">검색을 불러오지 못했어요 — Places API (New) 활성화를 확인해 주세요</div>';
+    }
   };
   if(gmapReady)go();else acQueue.push(go);
 }
 
+/* ---------- 날짜 ---------- */
+const WD=['일','월','화','수','목','금','토'];
+function dayDate(i){
+  if(!S.startDate)return null;
+  const d=new Date(S.startDate+'T00:00:00');
+  if(isNaN(d))return null;
+  d.setDate(d.getDate()+i);return d;
+}
+function dayDateLabel(i,long){
+  const d=dayDate(i);if(!d)return '';
+  return (d.getMonth()+1)+'/'+d.getDate()+(long?' ':'')+' ('+WD[d.getDay()]+')';
+}
+function tripRangeLabel(){
+  if(!S.startDate)return '여행 날짜';
+  const a=dayDate(0), b=dayDate(S.days.length-1);
+  return (a.getMonth()+1)+'/'+a.getDate()+' – '+(b.getMonth()+1)+'/'+b.getDate()+' · '+S.days.length+'일';
+}
+function iso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+
+$('#dateBtn').onclick=()=>{
+  const endD=S.startDate?iso(dayDate(S.days.length-1)):'';
+  openSheet('여행 날짜',
+    '<div class="field"><span class="lab">출발</span><input type="date" id="d-start" value="'+(S.startDate||'')+'"></div>'+
+    '<div class="field"><span class="lab">도착</span><input type="date" id="d-end" value="'+endD+'"></div>'+
+    '<div id="d-info" style="font-size:12.5px;font-weight:600;color:#8B95A1;padding:0 4px 14px"></div>'+
+    '<button class="btn btn-blue" id="d-save">저장하기</button>'+
+    (S.startDate?'<button class="btn btn-grey" id="d-clear" style="margin-top:8px">날짜 없이 쓰기</button>':''));
+  const a=$('#d-start'), b=$('#d-end'), info=$('#d-info');
+  const calc=()=>{
+    if(!a.value||!b.value){info.textContent='출발일과 도착일을 골라주세요';return 0;}
+    const n=Math.round((new Date(b.value)-new Date(a.value))/86400000)+1;
+    if(n<1){info.textContent='도착일이 출발일보다 빨라요';info.style.color='#F04452';return 0;}
+    info.style.color='#8B95A1';
+    const diff=n-S.days.length;
+    info.textContent=n+'일 일정'+(diff>0?' · '+diff+'일이 추가돼요':diff<0?' · 마지막 '+(-diff)+'일의 장소는 마지막 날로 옮겨져요':'');
+    return n;
+  };
+  a.onchange=b.onchange=calc; calc();
+  $('#d-save').onclick=()=>{
+    const n=calc(); if(!n)return;
+    S.startDate=a.value;
+    while(S.days.length<n) S.days.push({stops:[]});
+    if(S.days.length>n){
+      const cut=S.days.splice(n);
+      const moved=cut.reduce((acc,d)=>acc.concat(d.stops),[]);
+      if(moved.length) S.days[n-1].stops=S.days[n-1].stops.concat(moved);
+    }
+    if(curDay>=S.days.length)curDay=S.days.length-1;
+    save();closeSheet();renderPlan();fitMap();toast('여행 날짜를 저장했어요');
+  };
+  if($('#d-clear'))$('#d-clear').onclick=()=>{S.startDate='';save();closeSheet();renderPlan();};
+};
+
 function renderDays(){
+  $('#dateBtn').textContent=tripRangeLabel();
   const wrap=$('#dayChips');wrap.innerHTML='';
   S.days.forEach((d,i)=>{
     const b=document.createElement('button');
     b.className='dchip'+(i===curDay?' on':'');
-    b.textContent=`Day ${i+1}`;
+    const dl=dayDateLabel(i);
+    b.innerHTML='Day '+(i+1)+(dl?'<span class="dd">'+dl+'</span>':'');
     if(i===curDay)b.style.background=DAY_COLORS[i%DAY_COLORS.length];
     b.onclick=()=>{curDay=i;renderPlan();fitMap();};
     wrap.appendChild(b);
@@ -702,8 +786,33 @@ function renderDays(){
   plus.onclick=()=>{S.days.push({stops:[]});curDay=S.days.length-1;save();renderPlan();};
   wrap.appendChild(plus);
 }
+/* 다른 날로 옮기기 */
+function moveStop(fromDay,idx,toDay){
+  if(toDay===fromDay)return;
+  const s=S.days[fromDay].stops.splice(idx,1)[0];
+  S.days[toDay].stops.push(s);
+  save();renderPlan();
+  toast('Day '+(toDay+1)+'로 옮겼어요');
+}
+function moveSheet(idx){
+  const s=S.days[curDay].stops[idx];
+  openSheet('다른 날로 옮기기',
+    '<div style="font-size:13.5px;color:#6B7684;padding:0 4px 14px"><b style="color:#191F28">'+esc(s.name)+'</b> 을(를) 옮길 날짜를 골라주세요</div>'+
+    '<div class="moveday" id="mv"></div>');
+  const box=$('#mv');
+  S.days.forEach((d,i)=>{
+    const b=document.createElement('button');
+    const dl=dayDateLabel(i);
+    b.innerHTML='Day '+(i+1)+(dl?'<span class="dd">'+dl+'</span>':'');
+    if(i===curDay)b.classList.add('on');
+    b.onclick=()=>{moveStop(curDay,idx,i);closeSheet();};
+    box.appendChild(b);
+  });
+}
 function renderStops(){
-  const d=S.days[curDay];$('#dayTitle').textContent=`Day ${curDay+1}`;
+  const d=S.days[curDay];
+  const dl=dayDateLabel(curDay);
+  $('#dayTitle').innerHTML='Day '+(curDay+1)+(dl?'<span class="dsub">'+dl+'</span>':'');
   const c=DAY_COLORS[curDay%DAY_COLORS.length];
   const w=$('#stopList');w.innerHTML='';
   if(!d.stops.length){w.innerHTML='<div class="empty"><span class="emo">🗺️</span>아직 장소가 없어요<br>아래에서 첫 장소를 추가해 보세요</div>';return;}
@@ -722,6 +831,7 @@ function renderStops(){
           <div class="stop-acts">
             <button class="mini" data-a="up">${ICON_UP}</button>
             <button class="mini" data-a="dn">${ICON_DN}</button>
+            <button class="mini" data-a="mv"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M14 4h5v5M19 4l-7 7M10 20H5v-5M5 20l7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
             <button class="mini" data-a="ed"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></button>
             <button class="mini" data-a="del">${ICON_TRASH}</button>
           </div>
@@ -729,6 +839,7 @@ function renderStops(){
       </div>`;
     el.querySelector('[data-a=up]').onclick=()=>{if(i===0)return;[d.stops[i-1],d.stops[i]]=[d.stops[i],d.stops[i-1]];save();renderPlan();};
     el.querySelector('[data-a=dn]').onclick=()=>{if(i===d.stops.length-1)return;[d.stops[i+1],d.stops[i]]=[d.stops[i],d.stops[i+1]];save();renderPlan();};
+    el.querySelector('[data-a=mv]').onclick=()=>moveSheet(i);
     el.querySelector('[data-a=del]').onclick=()=>{d.stops.splice(i,1);save();renderPlan();};
     el.querySelector('[data-a=ed]').onclick=()=>editStop(i);
     w.appendChild(el);
@@ -747,18 +858,35 @@ $('#addStopBtn').onclick=()=>stopForm(null);
 function stopForm(place, editIdx=null){
   const s=editIdx!=null?S.days[curDay].stops[editIdx]:(place||{name:'',addr:'',lat:null,lng:null});
   openSheet(editIdx!=null?'장소 수정':'일정에 추가',`
+    <div class="acbox" id="ac-stop"></div>
     <div class="field"><span class="lab">장소</span><input id="f-name" value="${esc(s.name)}" placeholder="장소 이름">
-      <button id="f-search" style="display:flex;align-items:center;gap:4px;color:#00A661;font-weight:700;font-size:13px;flex-shrink:0;background:#E7F8F0;padding:7px 11px;border-radius:999px">${ICON_MAP}구글맵 검색</button></div>
+      <button id="f-search" style="display:flex;align-items:center;gap:4px;color:#00A661;font-weight:700;font-size:13px;flex-shrink:0;background:#E7F8F0;padding:7px 11px;border-radius:999px">${ICON_MAP}구글맵</button></div>
     ${GMAP_GUIDE}
     <div class="field"><span class="lab">링크</span><input id="f-gmap" value="${esc(s.gmap||'')}" placeholder="구글맵 링크 붙여넣기" inputmode="url"></div>
     <div id="f-pinstate" style="font-size:12.5px;font-weight:600;padding:0 4px 10px;margin-top:-4px;${s.lat!=null?'color:#00A661':'color:#B0B8C1'}">${s.lat!=null?'✓ 핀 위치가 지정돼 있어요':'링크를 붙여넣으면 지도에 핀이 찍혀요'}</div>
+    <div style="font-size:12.5px;font-weight:700;color:var(--g400);padding:2px 4px 8px">날짜</div>
+    <div class="moveday" id="f-days"></div>
     <div class="field"><span class="lab">시간</span><input id="f-time" value="${esc(s.time||'')}" placeholder="예: 10:30 또는 점심쯤"></div>
     <div class="field"><span class="lab">메모</span><textarea id="f-memo" rows="2" placeholder="예: 예약 필수, 3번 출구">${esc(s.memo||'')}</textarea></div>
     <button class="btn btn-blue" id="f-save">Day ${curDay+1}에 ${editIdx!=null?'저장':'추가'}</button>
   `);
   let lat=s.lat!=null?s.lat:null, lng=s.lng!=null?s.lng:null;
+  let targetDay=curDay;
+  const dbox=$('#f-days');
+  const drawDays=()=>{
+    dbox.innerHTML='';
+    S.days.forEach((d,i)=>{
+      const b=document.createElement('button');
+      const dl=dayDateLabel(i);
+      b.innerHTML='Day '+(i+1)+(dl?'<span class="dd">'+dl+'</span>':'');
+      if(i===targetDay)b.classList.add('on');
+      b.onclick=()=>{targetDay=i;drawDays();$('#f-save').textContent=(editIdx!=null?'Day '+(i+1)+'에 저장':'Day '+(i+1)+'에 추가');};
+      dbox.appendChild(b);
+    });
+  };
+  drawDays();
   $('#f-search').onclick=()=>openGmapSearch($('#f-name').value.trim());
-  attachAC($('#f-name'),p=>{
+  mountAC('ac-stop',p=>{
     lat=p.lat;lng=p.lng;
     $('#f-name').value=p.name;
     if(p.gmap)$('#f-gmap').value=p.gmap;
@@ -782,9 +910,12 @@ function stopForm(place, editIdx=null){
   $('#f-save').onclick=()=>{
     const name=$('#f-name').value.trim();if(!name){toast('장소 이름을 입력해 주세요');return;}
     const obj={...s,name,lat,lng,gmap:normLink(gm.value),time:$('#f-time').value.trim(),memo:$('#f-memo').value.trim()};
-    if(editIdx!=null)S.days[curDay].stops[editIdx]=obj;else S.days[curDay].stops.push(obj);
+    if(editIdx!=null){
+      if(targetDay===curDay){ S.days[curDay].stops[editIdx]=obj; }
+      else { S.days[curDay].stops.splice(editIdx,1); S.days[targetDay].stops.push(obj); }
+    }else{ S.days[targetDay].stops.push(obj); }
     save();closeSheet();renderPlan();fitMap();
-    toast(editIdx!=null?'수정했어요':`Day ${curDay+1}에 추가했어요`);
+    toast(`Day ${targetDay+1}에 ${editIdx!=null?'저장했어요':'추가했어요'}`);
   };
 }
 function editStop(i){stopForm(null,i);}
@@ -807,7 +938,7 @@ function nameFromGmap(u){
 function openGmapSearch(q){
   window.open('https://www.google.com/maps/search/'+encodeURIComponent(q||''),'_blank');
 }
-const GMAP_GUIDE='<div style="font-size:12px;color:#8B95A1;line-height:1.6;background:var(--g25);border-radius:12px;padding:12px 14px;margin-bottom:10px">💡 장소 칸에 이름을 입력하면 <b style="color:#4E5968">구글맵 자동완성</b>이 떠요. 선택하면 위치·링크가 자동으로 채워져요.<br><span style="color:#B0B8C1">자동완성이 안 뜨면 아래 링크 칸에 구글맵 전체 링크를 붙여넣어도 돼요</span></div>';
+const GMAP_GUIDE='<div style="font-size:12px;color:#8B95A1;line-height:1.6;background:var(--g25);border-radius:12px;padding:12px 14px;margin-bottom:10px">💡 위 검색창에서 장소를 고르면 이름·위치·링크가 자동으로 채워져요.<br><span style="color:#B0B8C1">검색이 안 되면 구글맵 전체 링크를 아래 칸에 붙여넣어도 돼요</span></div>';
 
 $('#tripTitle').oninput=e=>{S.title=e.target.value;save();};
 /* ================= 맛집 ================= */
@@ -840,7 +971,8 @@ function renderFood(){
 $('#addFoodBtn').onclick=()=>foodForm({});
 function foodForm(pre){
   openSheet('맛집 등록',`
-    <div class="field"><span class="lab">가게</span><input id="f-name" value="${esc(pre.name||'')}" placeholder="가게 이름 (입력하면 구글맵 자동완성)"></div>
+    <div class="acbox" id="ac-food"></div>
+    <div class="field"><span class="lab">가게</span><input id="f-name" value="${esc(pre.name||'')}" placeholder="가게 이름"></div>
     <div class="field"><span class="lab">구글맵</span><input id="f-gmap" value="${esc(pre.gmap||'')}" placeholder="구글맵 공유 링크 붙여넣기 (선택)" inputmode="url"></div>
     ${pre.gmap?'<div style="font-size:12px;color:#00A661;font-weight:600;padding:0 4px 10px;margin-top:-4px">✓ 검색 결과로 구글맵 링크를 만들어 뒀어요</div>':''}
     <div class="field"><span class="lab">링크</span><input id="f-link" placeholder="블로그·릴스 링크 (선택)" inputmode="url"></div>
@@ -849,9 +981,10 @@ function foodForm(pre){
     <button class="btn btn-blue" id="f-save">맛집 리스트에 추가</button>
   `);
   let img='';
-  attachAC($('#f-name'),p=>{
+  mountAC('ac-food',p=>{
     $('#f-name').value=p.name;
     if(p.gmap)$('#f-gmap').value=p.gmap;
+    if(!$('#f-memo').value&&p.addr)$('#f-memo').placeholder=p.addr;
     toast('구글맵 링크를 자동으로 채웠어요');
   });
   $('#f-img').onclick=()=>pickImage(d=>{img=d;$('#f-img').innerHTML=`<img src="${d}" alt="">`;});
