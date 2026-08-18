@@ -154,12 +154,23 @@ a{color:var(--blue);text-decoration:none}
 .gmapbtn{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:10px;
   background:#E7F8F0;color:#00A661;flex-shrink:0}
 .gmapbtn:active{background:#d3f0e2}
+.layerbtn{position:absolute;right:10px;top:52px;z-index:3;background:rgba(255,255,255,.95);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);font-size:16px;
+  width:34px;height:34px;border-radius:12px;box-shadow:0 2px 8px rgba(2,32,71,.18);opacity:.55}
+.layerbtn.on{background:#F04452;opacity:1;box-shadow:0 2px 10px rgba(240,68,82,.4)}
+body.mapmode .layerbtn{top:calc(52px + env(safe-area-inset-top))}
 .splitbtn{position:absolute;right:10px;top:10px;z-index:3;background:rgba(255,255,255,.95);
   backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:var(--g600);font-size:15px;font-weight:700;
   width:34px;height:34px;border-radius:12px;box-shadow:0 2px 8px rgba(2,32,71,.18)}
 .splitbtn:active{background:var(--g50)}
 /* ===== 지도 모드: 지도가 화면을 채우고, 목록이 아래에서 올라와요 ===== */
 .panel-grip{display:none}
+/* 지도·버튼·검색은 고정, 목록만 스크롤돼요 */
+.stickyhead{display:flex;flex-direction:column;min-height:0}
+.panel-fixed{flex-shrink:0}
+.panel-scroll{overflow-y:auto;-webkit-overflow-scrolling:touch;min-height:0;flex:1;
+  margin:0 -3px;padding:0 3px}
+body.mapmode .panel-scroll{max-height:none!important}
 body.mapmode .topbar{display:none}
 body.mapmode .page{padding-bottom:0}
 body.mapmode .mapwrap{position:fixed;top:0;left:50%;transform:translateX(-50%);
@@ -230,6 +241,7 @@ body.mapmode .daychips{padding-top:2px}
 .linkchip{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;padding:5px 10px;border-radius:999px;background:var(--g50);color:var(--g600);margin-top:6px}
 #shopMap{height:34vh;min-height:220px;max-height:340px;border-radius:var(--r-md);margin-bottom:10px;background:#fff;box-shadow:0 1px 3px rgba(2,32,71,.06)}
 #shopMap .map-off{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--g400);font-size:13px;font-weight:600;text-align:center;padding:16px}
+.foodpin{width:23px!important;height:23px!important;font-size:12px!important;border-style:dashed!important;opacity:.92}
 .tagpin{display:flex;align-items:center;justify-content:center;width:27px;height:27px;border-radius:50%;border:2.5px solid #fff;box-shadow:0 2px 8px rgba(2,32,71,.35);font-size:15px;cursor:pointer}
 .shop-tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;margin-bottom:3px}
 .acbox{margin-bottom:10px}
@@ -353,15 +365,17 @@ body.mapmode .daychips{padding-top:2px}
 <div class="page" id="pg-food">
   <div class="topbar"><h1>맛집 리스트</h1><div class="sub">가고 싶은 곳, 계속 모아두세요</div></div>
   <div class="mapwrap"><div id="foodMap"></div><div class="doc-tabs float" id="foodTabs"></div><button class="recenter" id="foodRecenter">핀 보기</button><button class="splitbtn" id="foodSplit" title="지도 크게 보기">⤢</button></div>
-  <div class="listpanel" id="foodPanel">
+  <div class="listpanel stickyhead" id="foodPanel">
     <div class="panel-grip"></div>
+    <div class="panel-fixed">
     <button class="btn btn-blue" id="addFoodBtn" style="margin-bottom:8px">맛집 추가하기</button>
     <div class="field listsearch" style="margin-bottom:10px">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="color:#8B95A1;flex-shrink:0"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m16.5 16.5 4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       <input id="foodFilter" placeholder="저장한 맛집 검색 (이름·종류·메모)" autocomplete="off">
       <button id="foodFilterX" style="color:#B0B8C1;font-size:16px;flex-shrink:0;display:none">✕</button>
     </div>
-    <div id="foodList"></div>
+    </div>
+    <div class="panel-scroll"><div id="foodList"></div></div>
   </div>
 </div>
 
@@ -382,16 +396,18 @@ body.mapmode .daychips{padding-top:2px}
     <div id="shopItemList"></div>
   </div>
   <div id="shopPlacesWrap" style="display:none">
-    <div class="mapwrap"><div id="shopMap"></div><div class="doc-tabs float" id="shopTabs"></div><button class="recenter" id="shopRecenter">핀 보기</button><button class="splitbtn" id="shopSplit" title="지도 크게 보기">⤢</button></div>
-    <div class="listpanel" id="shopPanel">
+    <div class="mapwrap"><div id="shopMap"></div><div class="doc-tabs float" id="shopTabs"></div><button class="recenter" id="shopRecenter">핀 보기</button><button class="splitbtn" id="shopSplit" title="지도 크게 보기">⤢</button><button class="layerbtn" id="shopFoodToggle" title="맛집도 함께 보기">🍜</button></div>
+    <div class="listpanel stickyhead" id="shopPanel">
       <div class="panel-grip"></div>
+      <div class="panel-fixed">
       <button class="btn btn-blue" id="addShopPlaceBtn" style="margin-bottom:8px">쇼핑 장소 추가하기</button>
       <div class="field listsearch" style="margin-bottom:10px">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="color:#8B95A1;flex-shrink:0"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m16.5 16.5 4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         <input id="shopFilter" placeholder="저장한 장소 검색 (이름·태그·메모)" autocomplete="off">
         <button id="shopFilterX" style="color:#B0B8C1;font-size:16px;flex-shrink:0;display:none">✕</button>
       </div>
-      <div id="shopPlaceList"></div>
+      </div>
+      <div class="panel-scroll"><div id="shopPlaceList"></div></div>
     </div>
   </div>
 </div>
@@ -550,7 +566,7 @@ end; $$;
    3) Settings → API 에서 아래 두 값 붙여넣기                       */
 const SUPABASE_URL = 'https://hmodjglzhubvvqlygdfl.supabase.co';      // 예: https://abcd.supabase.co
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhtb2RqZ2x6aHVidnZxbHlnZGZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwNTA3MDksImV4cCI6MjEwMjYyNjcwOX0.9-bmgGi5ECizgIgRmujCudjkXh4_mA5zEslvisnd_EE'; 
-
+  
 const cloudOn = ()=>SUPABASE_URL.startsWith('http') && SUPABASE_KEY.length>20;
 /* 아이디 → 내부 이메일, 짧은 비번은 자동 패딩 (4자리도 가능) */
 const ID_DOMAIN='@example.com', PW_PAD='::tripmate-9f2a';  // .local 등 예약 TLD는 Supabase가 거부해요
@@ -984,6 +1000,7 @@ document.querySelectorAll('[data-nav]').forEach(b=>{
     $('#pg-'+b.dataset.nav).classList.add('on');
     if(b.dataset.nav==='plan') setTimeout(fitMap,60);
     if(b.dataset.nav==='food') setTimeout(drawFoodMap,60);
+    setTimeout(sizePanels,80);
   };
 });
 /* ================= 지도 & 일정 ================= */
@@ -1231,6 +1248,7 @@ function styleOf(kind,label,fb){
 }
 function tagStyle(tag){ return styleOf('shop',tag,'🛍️'); }
 let curShopTag='전체';
+let showFoodOnShop=false;   /* 쇼핑 지도에 맛집도 함께 표시할지 */
 
 /* ---------- 쇼핑 장소 지도 ---------- */
 let shopMap=null, shopObjs=[], shopInfo=null;
@@ -1271,7 +1289,25 @@ function drawShopMap(){
     m.addListener('click',m.__openInfo);
     shopObjs.push(m);
   });
-  fitPoints(shopMap,pts,14);
+  /* 맛집도 함께 보기: 살짝 작고 테두리가 다른 마커로 구분해요 */
+  if(showFoodOnShop){
+    S.food.filter(f=>f.lat!=null).forEach(f=>{
+      const fs=foodStyle(f.cat);
+      const el=document.createElement('div');
+      el.className='tagpin foodpin';
+      el.style.background=fs.color;
+      el.textContent=fs.emo;
+      if(f.done)el.style.opacity='.5';
+      const m=new GM.AdvancedMarkerElement({position:{lat:+f.lat,lng:+f.lng},map:shopMap,content:el,title:f.name,zIndex:1});
+      m.__openInfo=()=>{
+        shopInfo.setContent(infoHtml(f,f.cat,fs.color,f.memo));
+        shopInfo.open({map:shopMap,anchor:m});
+      };
+      m.addListener('click',m.__openInfo);
+      shopObjs.push(m);
+    });
+  }
+  fitPoints(shopMap,pts.length?pts:S.food.filter(f=>f.lat!=null),14);
 }
 
 /* ---------- 맛집 지도 ---------- */
@@ -1686,6 +1722,7 @@ $('#tripTitle').oninput=e=>{S.title=e.target.value;save();};
 function foodCats(){ return tagDefs('food').map(t=>t.label); }
 let curFoodCat='전체';
 function renderFood(){
+  setTimeout(sizePanels,0);
   /* 카테고리 필터 탭 (실제 등록된 것 + 전체) */
   const used=[...new Set(S.food.map(f=>f.cat).filter(Boolean))];
   const tabs=['전체',...used];
@@ -1794,6 +1831,7 @@ document.querySelectorAll('[data-shopseg]').forEach(b=>{
     $('#shopItemsWrap').style.display=curShopSeg==='items'?'':'none';
     $('#shopPlacesWrap').style.display=curShopSeg==='places'?'':'none';
     if(curShopSeg==='places')setTimeout(drawShopMap,50);
+    setTimeout(sizePanels,60);
   };
 });
 /* 링크는 여러 개 저장 가능 (예전 단일 link 데이터도 그대로 읽어요) */
@@ -1889,6 +1927,7 @@ function gmapBtn(o){
 const ICON_EDIT='<svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>';
 
 function renderShop(){
+  setTimeout(sizePanels,0);
   const iw=$('#shopItemList');iw.innerHTML='';
   if(!S.shopItems.length){iw.innerHTML='<div class="card"><div class="empty"><span class="emo">🛍️</span>살 것이 아직 없어요<br>릴스에서 본 그 아이템, 여기 저장해 두세요</div></div>';}
   const ilist=S.shopItems.filter(matchItem);
@@ -2732,6 +2771,22 @@ function initListSearches(){
   bindListSearch('#itemFilter','#itemFilterX',q=>{itemQuery=q;renderShop();});
 }
 
+/* 화면에 남는 만큼만 목록에 주고, 나머지는 고정해요 */
+function sizePanels(){
+  if(document.body.classList.contains('mapmode')){
+    document.querySelectorAll('.panel-scroll').forEach(el=>el.style.maxHeight='');
+    return;
+  }
+  const navH=(document.querySelector('.nav')||{offsetHeight:60}).offsetHeight||60;
+  document.querySelectorAll('.page.on .panel-scroll').forEach(el=>{
+    const top=el.getBoundingClientRect().top+window.scrollY;
+    const h=window.innerHeight-navH-(top-window.scrollY)-10;
+    el.style.maxHeight=Math.max(180,h)+'px';
+  });
+}
+window.addEventListener('resize',()=>setTimeout(sizePanels,80));
+window.addEventListener('orientationchange',()=>setTimeout(sizePanels,250));
+
 /* 지도 모드: 지도가 화면을 채우고 목록은 아래 패널로 */
 let mapMode=null;                       // 'plan' | 'shop' | 'food' | null
 function setMapMode(kind,after){
@@ -2752,7 +2807,7 @@ function setMapMode(kind,after){
     b.textContent=on?'⤡':'⤢';
     b.title=on?'지도 작게 보기':'지도 크게 보기';
   });
-  setTimeout(()=>{ if(after)after(); },260);
+  setTimeout(()=>{ if(after)after(); sizePanels(); },260);
 }
 function bindSplit(btnId,kind,after){
   const btn=$(btnId);if(!btn)return;
@@ -2797,6 +2852,14 @@ document.querySelectorAll('[data-nav]').forEach(b=>{
   };
 });
 
+/* 쇼핑 지도에 맛집 함께 보기 */
+$('#shopFoodToggle').onclick=()=>{
+  showFoodOnShop=!showFoodOnShop;
+  $('#shopFoodToggle').classList.toggle('on',showFoodOnShop);
+  drawShopMap();
+  toast(showFoodOnShop?'맛집도 함께 표시해요':'맛집 표시를 껐어요');
+};
+
 /* 지도 되돌리기 버튼 */
 $('#planRecenter').onclick=()=>fitMap();
 $('#shopRecenter').onclick=()=>{
@@ -2819,6 +2882,7 @@ function boot(){
   addTripSwitcher();
   initShopQuickSearch();
   initListSearches();
+  setTimeout(sizePanels,120);
 }
 
 (async()=>{
