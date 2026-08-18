@@ -138,6 +138,40 @@ a{color:var(--blue);text-decoration:none}
 #foodList .card:active,#shopPlaceList .card:active{background:var(--g25)}
 .mapwrap{position:relative;margin-bottom:10px}
 .mapwrap #map{margin-bottom:0}
+.mini.gmapmini{background:#E7F8F0;color:#00A661}
+.gmapbtn{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:10px;
+  background:#E7F8F0;color:#00A661;flex-shrink:0}
+.gmapbtn:active{background:#d3f0e2}
+.splitbtn{position:absolute;right:10px;top:10px;z-index:3;background:rgba(255,255,255,.95);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:var(--g600);font-size:15px;font-weight:700;
+  width:34px;height:34px;border-radius:12px;box-shadow:0 2px 8px rgba(2,32,71,.18)}
+.splitbtn:active{background:var(--g50)}
+/* ===== 지도 모드: 지도가 화면을 채우고, 목록이 아래에서 올라와요 ===== */
+.panel-grip{display:none}
+body.mapmode .topbar{display:none}
+body.mapmode .page{padding-bottom:0}
+body.mapmode .mapwrap{position:fixed;top:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:520px;height:100dvh;margin:0;padding:0;z-index:30}
+body.mapmode .mapwrap #map,
+body.mapmode .mapwrap #shopMap,
+body.mapmode .mapwrap #foodMap{height:100%;max-height:none;border-radius:0;box-shadow:none}
+body.mapmode .mapwrap .splitbtn{top:calc(10px + env(safe-area-inset-top));background:var(--g900);color:#fff}
+body.mapmode .mapwrap .recenter{bottom:calc(46dvh + 14px);transition:bottom .3s cubic-bezier(.2,.8,.2,1)}
+body.mapmode.panel-down .mapwrap .recenter{bottom:104px}
+body.mapmode .mapwrap .doc-tabs.float{top:calc(10px + env(safe-area-inset-top));right:56px}
+
+/* 아래에서 올라오는 목록 패널 (높이 고정) */
+body.mapmode .listpanel{position:fixed;bottom:calc(56px + env(safe-area-inset-bottom));left:50%;
+  width:100%;max-width:520px;height:46dvh;z-index:40;background:#fff;
+  border-radius:22px 22px 0 0;box-shadow:0 -6px 24px rgba(2,32,71,.16);
+  overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 16px 18px;
+  transform:translateX(-50%);transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+body.mapmode.panel-down .listpanel{transform:translate(-50%,calc(46dvh - 46px))}
+body.mapmode .panel-grip{display:block;position:sticky;top:0;background:#fff;z-index:2;
+  padding:10px 0 8px;margin:0 -16px;cursor:pointer}
+body.mapmode .panel-grip::before{content:'';display:block;width:40px;height:4px;border-radius:99px;background:var(--g200);margin:0 auto}
+body.mapmode .daychips{padding-top:2px}
+@media (max-width:390px){ body.mapmode .listpanel{padding:0 13px 18px} }
 .recenter{position:absolute;right:10px;bottom:10px;z-index:3;background:rgba(255,255,255,.95);
   backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:var(--g700);font-size:12.5px;font-weight:700;
   padding:8px 13px;border-radius:999px;box-shadow:0 2px 8px rgba(2,32,71,.18)}
@@ -277,7 +311,9 @@ a{color:var(--blue);text-decoration:none}
       <button id="shareBtn" class="sharebtn">링크 공유</button>
     </div>
   </div>
-  <div class="mapwrap"><div id="map"></div><button class="recenter" id="planRecenter">핀 보기</button></div>
+  <div class="mapwrap"><div id="map"></div><button class="recenter" id="planRecenter">핀 보기</button><button class="splitbtn" id="planSplit" title="지도 크게 보기">⤢</button></div>
+  <div class="listpanel" id="planPanel">
+  <div class="panel-grip"></div>
   <div class="daychips" id="dayChips"></div>
   <div class="card">
     <div class="day-head">
@@ -290,14 +326,18 @@ a{color:var(--blue);text-decoration:none}
       장소 추가
     </button>
   </div>
+  </div>
 </div>
 
 <!-- ===== 맛집 ===== -->
 <div class="page" id="pg-food">
   <div class="topbar"><h1>맛집 리스트</h1><div class="sub">가고 싶은 곳, 계속 모아두세요</div></div>
-  <div class="mapwrap"><div id="foodMap"></div><div class="doc-tabs float" id="foodTabs"></div><button class="recenter" id="foodRecenter">핀 보기</button></div>
-  <div id="foodList"></div>
-  <button class="btn btn-blue" id="addFoodBtn" style="margin-top:6px">맛집 추가하기</button>
+  <div class="mapwrap"><div id="foodMap"></div><div class="doc-tabs float" id="foodTabs"></div><button class="recenter" id="foodRecenter">핀 보기</button><button class="splitbtn" id="foodSplit" title="지도 크게 보기">⤢</button></div>
+  <div class="listpanel" id="foodPanel">
+    <div class="panel-grip"></div>
+    <button class="btn btn-blue" id="addFoodBtn" style="margin-bottom:10px">맛집 추가하기</button>
+    <div id="foodList"></div>
+  </div>
 </div>
 
 <!-- ===== 쇼핑 ===== -->
@@ -308,13 +348,16 @@ a{color:var(--blue);text-decoration:none}
     <button data-shopseg="places">📍 쇼핑 장소</button>
   </div>
   <div id="shopItemsWrap">
+    <button class="btn btn-blue" id="addShopItemBtn" style="margin-bottom:10px">살 것 추가하기</button>
     <div id="shopItemList"></div>
-    <button class="btn btn-blue" id="addShopItemBtn" style="margin-top:6px">살 것 추가하기</button>
   </div>
   <div id="shopPlacesWrap" style="display:none">
-    <div class="mapwrap"><div id="shopMap"></div><div class="doc-tabs float" id="shopTabs"></div><button class="recenter" id="shopRecenter">핀 보기</button></div>
-    <div id="shopPlaceList"></div>
-    <button class="btn btn-blue" id="addShopPlaceBtn" style="margin-top:6px">쇼핑 장소 추가하기</button>
+    <div class="mapwrap"><div id="shopMap"></div><div class="doc-tabs float" id="shopTabs"></div><button class="recenter" id="shopRecenter">핀 보기</button><button class="splitbtn" id="shopSplit" title="지도 크게 보기">⤢</button></div>
+    <div class="listpanel" id="shopPanel">
+      <div class="panel-grip"></div>
+      <button class="btn btn-blue" id="addShopPlaceBtn" style="margin-bottom:10px">쇼핑 장소 추가하기</button>
+      <div id="shopPlaceList"></div>
+    </div>
   </div>
 </div>
 
@@ -354,8 +397,8 @@ a{color:var(--blue);text-decoration:none}
 <div class="page" id="pg-docs">
   <div class="topbar"><h1>여행 정보</h1><div class="sub">항공권부터 체크인까지, 흩어지지 않게</div></div>
   <div class="doc-tabs" id="docTabs"></div>
+  <button class="btn btn-blue" id="addDocBtn" style="margin-bottom:10px">정보 추가하기</button>
   <div id="docList"></div>
-  <button class="btn btn-blue" id="addDocBtn" style="margin-top:6px">정보 추가하기</button>
 </div>
 
 <!-- ===== nav ===== -->
@@ -425,53 +468,9 @@ let S={
 let curDay=0, curDocCat='전체', curShopSeg='items', curExpWho='all';
 let memOnly=false;
 
-/* ===== Supabase 설정 =====
-   1) supabase.com 프로젝트 생성 → SQL Editor에 아래 전체 실행:
-
-create extension if not exists pgcrypto;
-
-create table trips (
-  code text primary key,
-  data jsonb default '{}'::jsonb,
-  owner_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
-  join_secret text not null default encode(gen_random_bytes(8),'hex'),
-  updated_at timestamptz default now()
-);
-create table trip_members (
-  code text not null references trips(code) on delete cascade,
-  user_id uuid not null references auth.users(id) on delete cascade,
-  primary key (code, user_id)
-);
-alter table trips enable row level security;
-alter table trip_members enable row level security;
-
-create or replace function is_member(t text) returns boolean
-language sql security definer stable as $$
-  select exists(select 1 from trip_members m where m.code=t and m.user_id=auth.uid());
-$$;
-
-create policy "trip read"   on trips for select using (owner_id=auth.uid() or is_member(code));
-create policy "trip insert" on trips for insert with check (owner_id=auth.uid());
-create policy "trip update" on trips for update using (owner_id=auth.uid() or is_member(code));
-create policy "trip delete" on trips for delete using (owner_id=auth.uid());
-create policy "mem read"    on trip_members for select using (user_id=auth.uid());
-create policy "mem leave"   on trip_members for delete using (user_id=auth.uid());
-
-create or replace function join_trip(p_code text, p_secret text) returns boolean
-language plpgsql security definer as $$
-begin
-  if not exists(select 1 from trips where code=p_code and join_secret=p_secret) then
-    return false;
-  end if;
-  insert into trip_members(code,user_id) values(p_code,auth.uid()) on conflict do nothing;
-  return true;
-end; $$;
-
-   2) Authentication → Sign In / Providers → Email 에서
-      "Confirm email" 끄기 (아이디 로그인이라 인증메일이 필요 없어요)
-   3) Settings → API 에서 아래 두 값 붙여넣기                       */
+/* ===== Supabase 설정 ===== */
 const SUPABASE_URL = 'https://hmodjglzhubvvqlygdfl.supabase.co';      // 예: https://abcd.supabase.co
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhtb2RqZ2x6aHVidnZxbHlnZGZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwNTA3MDksImV4cCI6MjEwMjYyNjcwOX0.9-bmgGi5ECizgIgRmujCudjkXh4_mA5zEslvisnd_EE';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhtb2RqZ2x6aHVidnZxbHlnZGZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwNTA3MDksImV4cCI6MjEwMjYyNjcwOX0.9-bmgGi5ECizgIgRmujCudjkXh4_mA5zEslvisnd_EE'; 
 
 const cloudOn = ()=>SUPABASE_URL.startsWith('http') && SUPABASE_KEY.length>20;
 /* 아이디 → 내부 이메일, 짧은 비번은 자동 패딩 (4자리도 가능) */
@@ -738,6 +737,23 @@ const ICON_UP='<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path
 const ICON_DN='<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="m6 10 6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
 /* 이미지 리사이즈 → base64 */
+/* PDF 등 일반 파일을 base64로 읽어요 (용량이 크면 저장이 느려질 수 있어 경고해요) */
+function pickFile(accept,cb){
+  const inp=document.createElement('input');inp.type='file';inp.accept=accept;
+  inp.onchange=()=>{
+    const f=inp.files[0];if(!f)return;
+    if(f.size>8*1024*1024){toast('8MB보다 큰 파일은 저장이 불안정할 수 있어요');}
+    const r=new FileReader();
+    r.onload=()=>cb({name:f.name,data:r.result,size:f.size});
+    r.onerror=()=>toast('파일을 읽지 못했어요');
+    r.readAsDataURL(f);
+  };
+  inp.click();
+}
+function fileSizeLabel(b){
+  if(!b)return'';
+  return b<1024*1024?Math.round(b/1024)+'KB':(b/1024/1024).toFixed(1)+'MB';
+}
 function pickImage(cb){
   const inp=document.createElement('input');inp.type='file';inp.accept='image/*';
   inp.onchange=()=>{
@@ -903,9 +919,7 @@ function drawMap(){
       });
       m.__key=di+':'+si;
       m.__openInfo=()=>{
-        infoWin.setContent('<div style="font-family:inherit;padding:2px 4px"><b style="font-size:14px">'+esc(s.name)+'</b>'+
-          (s.time?'<br><span style="color:#3182F6;font-weight:700;font-size:12px">'+esc(s.time)+'</span>':'')+
-          (s.memo?'<br><span style="font-size:12px;color:#6B7684">'+esc(s.memo)+'</span>':'')+'</div>');
+        infoWin.setContent(infoHtml(s, s.time?('Day '+(di+1)+' · '+s.time):('Day '+(di+1)), c, s.memo));
         infoWin.open({map,anchor:m});
       };
       m.addListener('click',m.__openInfo);
@@ -949,9 +963,14 @@ function focusPin(mapObj,infoObj,objs,idxOrMatch,scrollTo){
   const lat=typeof p.lat==='function'?p.lat():p.lat;
   const lng=typeof p.lng==='function'?p.lng():p.lng;
   mapObj.setCenter({lat:+lat,lng:+lng});
-  mapObj.setZoom(16);
+  mapObj.setZoom(14);
+  /* 지도 모드에선 아래쪽 목록 패널만큼 위로 올려서 핀이 가리지 않게 해요 */
+  if(document.body.classList.contains('mapmode')&&mapObj.panBy){
+    const shift=document.body.classList.contains('panel-down')?60:Math.round(window.innerHeight*0.22);
+    setTimeout(()=>mapObj.panBy(0,shift),60);
+  }
   if(m.__openInfo)m.__openInfo();
-  if(scrollTo){
+  if(scrollTo&&!document.body.classList.contains('mapmode')){
     const el=document.getElementById(scrollTo);
     if(el&&el.scrollIntoView)el.scrollIntoView({behavior:'smooth',block:'start'});
   }
@@ -973,7 +992,7 @@ function fitMap(){
     map.setCenter({lat:ri[2],lng:ri[3]});map.setZoom(ri[4]);
     return;
   }
-  fitPoints(map,pts,15);
+  fitPoints(map,pts,14);
 }
 /* ---------- 쇼핑 태그 ---------- */
 const SHOP_TAGS=[
@@ -1051,16 +1070,13 @@ function drawShopMap(){
     const m=new GM.AdvancedMarkerElement({position:{lat:+p.lat,lng:+p.lng},map:shopMap,content:el,title:p.name});
     m.__key=p.id||p.name;
     m.__openInfo=()=>{
-      shopInfo.setContent('<div style="font-family:inherit;padding:2px 4px">'+
-        (p.tag?'<span style="font-size:11px;font-weight:700;color:'+st.color+'">'+esc(p.tag)+'</span><br>':'')+
-        '<b style="font-size:14px">'+esc(p.name)+'</b>'+
-        (p.memo?'<br><span style="font-size:12px;color:#6B7684">'+esc(p.memo)+'</span>':'')+'</div>');
+      shopInfo.setContent(infoHtml(p, p.tag, st.color, p.memo));
       shopInfo.open({map:shopMap,anchor:m});
     };
     m.addListener('click',m.__openInfo);
     shopObjs.push(m);
   });
-  fitPoints(shopMap,pts,15);
+  fitPoints(shopMap,pts,14);
 }
 
 /* ---------- 맛집 지도 ---------- */
@@ -1100,16 +1116,13 @@ function drawFoodMap(){
     const m=new GM.AdvancedMarkerElement({position:{lat:+f.lat,lng:+f.lng},map:foodMap,content:el,title:f.name});
     m.__key=f.name;
     m.__openInfo=()=>{
-      foodInfo.setContent('<div style="font-family:inherit;padding:2px 4px">'+
-        (f.cat?'<span style="font-size:11px;font-weight:700;color:'+st.color+'">'+esc(f.cat)+'</span><br>':'')+
-        '<b style="font-size:14px">'+esc(f.name)+'</b>'+
-        (f.memo?'<br><span style="font-size:12px;color:#6B7684">'+esc(f.memo)+'</span>':'')+'</div>');
+      foodInfo.setContent(infoHtml(f, f.cat, st.color, f.memo));
       foodInfo.open({map:foodMap,anchor:m});
     };
     m.addListener('click',m.__openInfo);
     foodObjs.push(m);
   });
-  fitPoints(foodMap,pts,15);
+  fitPoints(foodMap,pts,14);
 }
 
 /* Places 자동완성: 구글 위젯 대신 AutocompleteSuggestion API로 직접 검색·렌더
@@ -1331,6 +1344,7 @@ function renderStops(){
             ${s.memo?`<div class="memoline">${esc(s.memo)}</div>`:''}
           </div>
           <div class="stop-acts">
+            ${gmapHref(s)?`<button class="mini gmapmini" data-a="gmap" title="구글맵으로 열기">${ICON_MAP}</button>`:''}
             <button class="mini" data-a="up">${ICON_UP}</button>
             <button class="mini" data-a="dn">${ICON_DN}</button>
             <button class="mini" data-a="mv"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M14 4h5v5M19 4l-7 7M10 20H5v-5M5 20l7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
@@ -1349,6 +1363,8 @@ function renderStops(){
     el.querySelector('.stop-dot').onclick=()=>{
       if(s.lat!=null)focusPin(map,infoWin,gmapObjs,m=>m.__key===curDay+':'+i,'map');
     };
+    const gb=el.querySelector('[data-a=gmap]');
+    if(gb)gb.onclick=(ev)=>{ev.stopPropagation();window.open(gmapHref(s),'_blank','noopener');};
     el.querySelector('[data-a=mv]').onclick=()=>moveSheet(i);
     el.querySelector('[data-a=del]').onclick=()=>{d.stops.splice(i,1);save();renderPlan();};
     el.querySelector('[data-a=ed]').onclick=()=>editStop(i);
@@ -1487,13 +1503,14 @@ function renderFood(){
           ${f.cat?`<div style="font-size:11.5px;font-weight:700;color:#3182F6;margin-bottom:3px">${esc(f.cat)}</div>`:''}
           <div class="it-name" style="font-size:16px;font-weight:700">${esc(f.name)}</div>
           ${f.memo?`<div class="memoline">${esc(f.memo)}</div>`:''}
-          <div style="display:flex;gap:6px;flex-wrap:wrap">
-            ${f.gmap?`<a class="linkline gmap" href="${esc(f.gmap)}" target="_blank" rel="noopener">${ICON_MAP}<span>구글맵</span></a>`:''}
-            ${f.link?`<a class="linkline" href="${esc(f.link)}" target="_blank" rel="noopener">${ICON_LINK}<span>${esc(hostOf(f.link))}</span></a>`:''}
-          </div>
+          ${f.link?`<a class="linkline" href="${esc(f.link)}" target="_blank" rel="noopener">${ICON_LINK}<span>${esc(hostOf(f.link))}</span></a>`:''}
           ${f.img?`<img class="thumb" src="${f.img}" alt="">`:''}
         </div>
-        <button class="row-del" data-a="del">${ICON_TRASH}</button>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex-shrink:0">
+          ${gmapBtn(f)}
+          <button class="mini" data-a="ed">${ICON_EDIT}</button>
+          <button class="mini" data-a="del">${ICON_TRASH}</button>
+        </div>
       </div>`;
     el.onclick=(ev)=>{
       if(ev.target.closest('button')||ev.target.closest('a'))return;
@@ -1501,47 +1518,55 @@ function renderFood(){
       focusPin(foodMap,foodInfo,foodObjs,m=>m.__key===f.name,'foodMap');
     };
     el.querySelector('[data-a=chk]').onclick=()=>{f.done=!f.done;save();renderFood();drawFoodMap();};
+    el.querySelector('[data-a=ed]').onclick=()=>foodForm(null,i);
     el.querySelector('[data-a=del]').onclick=()=>{S.food.splice(i,1);save();renderFood();drawFoodMap();};
     w.appendChild(el);
   });
 }
 
 /* 맛집 추가: 장소 검색 → 등록 (구글맵 링크 자동 생성) */
-$('#addFoodBtn').onclick=()=>foodForm({});
-function foodForm(pre){
-  openSheet('맛집 등록',`
-    <div class="acbox" id="ac-food"></div>
-    <div class="field"><span class="lab">가게</span><input id="f-name" value="${esc(pre.name||'')}" placeholder="가게 이름"></div>
-    <div style="font-size:12.5px;font-weight:700;color:var(--g400);padding:2px 4px 8px">종류</div>
-    <div class="catpick" id="f-fcats" data-kind="food"></div>
-    <div class="field"><span class="lab">구글맵</span><input id="f-gmap" value="${esc(pre.gmap||'')}" placeholder="구글맵 공유 링크 붙여넣기 (선택)" inputmode="url"></div>
-    ${pre.gmap?'<div style="font-size:12px;color:#00A661;font-weight:600;padding:0 4px 10px;margin-top:-4px">✓ 검색 결과로 구글맵 링크를 만들어 뒀어요</div>':''}
-    <div class="field"><span class="lab">링크</span><input id="f-link" placeholder="블로그·릴스 링크 (선택)" inputmode="url"></div>
-    <div class="field"><span class="lab">메모</span><textarea id="f-memo" rows="2" placeholder="예: 우니 크림 파스타가 유명, 웨이팅 있음"></textarea></div>
-    <button class="imgpick" id="f-img">📷 사진 첨부하기 (선택)</button>
-    <button class="btn btn-blue" id="f-save">맛집 리스트에 추가</button>
-  `);
-  let img='';
-  let fcat=curFoodCat!=='전체'?curFoodCat:'🍣 일식';
+$('#addFoodBtn').onclick=()=>foodForm({},null);
+function foodForm(pre,idx){
+  const edit=idx!=null;
+  const o=edit?S.food[idx]:(pre||{});
+  openSheet(edit?'맛집 수정':'맛집 등록',
+    '<div class="acbox" id="ac-food"></div>'+
+    '<div class="field"><span class="lab">가게</span><input id="f-name" value="'+esc(o.name||'')+'" placeholder="가게 이름"></div>'+
+    '<div style="font-size:12.5px;font-weight:700;color:var(--g400);padding:2px 4px 8px">종류</div>'+
+    '<div class="catpick" id="f-fcats" data-kind="food"></div>'+
+    '<div id="f-pinstate" style="font-size:12.5px;font-weight:600;padding:0 4px 10px;color:'+(o.lat!=null?'#00A661':'#B0B8C1')+'">'+
+      (o.lat!=null?'✓ 지도에 표시돼요':'위에서 검색해 고르면 지도에 표시돼요')+'</div>'+
+    '<div class="field"><span class="lab">지도용</span><input id="f-gmap" value="'+esc(o.gmap||'')+'" placeholder="검색하면 자동으로 채워져요" inputmode="url"></div>'+
+    '<div class="field"><span class="lab">구글맵</span><input id="f-gshort" value="'+esc(o.gshort||'')+'" placeholder="https://maps.app.goo.gl/… (공유 링크)" inputmode="url"></div>'+
+    '<div style="font-size:12px;color:#B0B8C1;padding:0 4px 12px;line-height:1.6">구글맵 앱에서 <b style="color:#8B95A1">공유 → 링크 복사</b>한 주소를 넣으면, 카드의 지도 버튼이 구글맵으로 바로 연결돼요</div>'+
+    '<div class="field"><span class="lab">링크</span><input id="f-link" value="'+esc(o.link||'')+'" placeholder="블로그·릴스 링크 (선택)" inputmode="url"></div>'+
+    '<div class="field"><span class="lab">메모</span><textarea id="f-memo" rows="2" placeholder="예: 우니 크림 파스타가 유명, 웨이팅 있음">'+esc(o.memo||'')+'</textarea></div>'+
+    '<button class="imgpick" id="f-img">'+(o.img?'<img src="'+o.img+'" alt="">':'📷 사진 첨부하기 (선택)')+'</button>'+
+    '<button class="btn btn-blue" id="f-save">'+(edit?'저장하기':'맛집 리스트에 추가')+'</button>');
+  let img=o.img||'';
+  let fcat=o.cat||(curFoodCat!=='전체'?curFoodCat:foodCats()[0]);
+  let flat=o.lat!=null?o.lat:null, flng=o.lng!=null?o.lng:null, faddr=o.addr||'';
   buildCatPick($('#f-fcats'), foodCats, fcat, c=>fcat=c, v=>{fcat=addTag('food',v);}, 'food');
-  let flat=pre.lat!=null?pre.lat:null, flng=pre.lng!=null?pre.lng:null, faddr=pre.addr||'';
   mountAC('ac-food',p=>{
     flat=p.lat;flng=p.lng;faddr=p.addr||'';
     $('#f-name').value=p.name;
     if(p.gmap)$('#f-gmap').value=p.gmap;
-    if(!$('#f-memo').value&&p.addr)$('#f-memo').placeholder=p.addr;
-    toast('위치를 찾았어요 · 지도에 표시돼요');
+    const st=$('#f-pinstate');
+    st.textContent='✓ '+(p.addr||'위치를 찾았어요')+' — 지도에 표시돼요';
+    st.style.color='#00A661';
   });
-  $('#f-img').onclick=()=>pickImage(d=>{img=d;$('#f-img').innerHTML=`<img src="${d}" alt="">`;});
+  $('#f-img').onclick=()=>pickImage(d=>{img=d;$('#f-img').innerHTML='<img src="'+d+'" alt="">';});
   $('#f-save').onclick=()=>{
     const name=$('#f-name').value.trim();if(!name){toast('가게 이름을 입력해 주세요');return;}
     const gmapUrl=normLink($('#f-gmap').value);
     if(flat==null){ const c=parseGmap(gmapUrl); if(c){flat=c.lat;flng=c.lng;} }
-    S.food.unshift({name, cat:fcat, lat:flat, lng:flng, addr:faddr,
-      gmap:gmapUrl,
+    const obj={name, cat:fcat, lat:flat, lng:flng, addr:faddr,
+      gmap:gmapUrl, gshort:normLink($('#f-gshort').value),
       link:normLink($('#f-link').value),
-      memo:$('#f-memo').value.trim(), img, done:false});
-    save();closeSheet();renderFood();drawFoodMap();toast('맛집을 추가했어요');
+      memo:$('#f-memo').value.trim(), img, done:edit?!!o.done:false};
+    if(edit)S.food[idx]=obj; else S.food.unshift(obj);
+    save();closeSheet();renderFood();drawFoodMap();
+    toast(edit?'수정했어요':'맛집을 추가했어요');
   };
 }
 
@@ -1565,6 +1590,34 @@ function linksHtml(o){
   if(!ls.length)return '';
   return '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:2px">'+
     ls.map(u=>'<a class="linkline" href="'+esc(u)+'" target="_blank" rel="noopener">'+ICON_LINK+'<span>'+esc(hostOf(u))+'</span></a>').join('')+'</div>';
+}
+/* 구글맵으로 이동하는 링크: 공유 링크(gshort)가 있으면 우선, 없으면 지도용 링크 */
+function gmapHref(o){ return (o&&(o.gshort||o.gmap))||''; }
+/* 지도 말풍선: 오른쪽에 구글맵으로 이동하는 버튼을 붙여요 */
+function mapsUrlFor(o){
+  const u=gmapHref(o);
+  if(u)return u;
+  if(o&&o.lat!=null)return 'https://www.google.com/maps/search/?api=1&query='+o.lat+','+o.lng;
+  return 'https://www.google.com/maps/search/'+encodeURIComponent((o&&o.name)||'');
+}
+function infoHtml(o,label,color,sub){
+  return '<div style="font-family:inherit;display:flex;align-items:flex-start;gap:10px;padding:3px 2px;min-width:170px">'+
+      '<div style="min-width:0;flex:1">'+
+        (label?'<div style="font-size:11px;font-weight:700;color:'+color+';margin-bottom:2px">'+esc(label)+'</div>':'')+
+        '<div style="font-size:14.5px;font-weight:800;color:#191F28;line-height:1.35">'+esc(o.name)+'</div>'+
+        (sub?'<div style="font-size:12px;color:#6B7684;margin-top:3px;line-height:1.45">'+esc(sub)+'</div>':'')+
+        (o.addr?'<div style="font-size:11.5px;color:#B0B8C1;margin-top:3px">'+esc(o.addr)+'</div>':'')+
+      '</div>'+
+      '<a href="'+esc(mapsUrlFor(o))+'" target="_blank" rel="noopener" title="구글맵에서 열기" '+
+        'style="flex-shrink:0;width:34px;height:34px;border-radius:50%;background:#E8F3FF;display:flex;align-items:center;justify-content:center;text-decoration:none">'+
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M14 4h6v6M20 4l-8.5 8.5M18 14v4.5A1.5 1.5 0 0 1 16.5 20h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6H10" stroke="#3182F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'+
+      '</a>'+
+    '</div>';
+}
+function gmapBtn(o){
+  const u=gmapHref(o);
+  if(!u)return '';
+  return '<a class="gmapbtn" href="'+esc(u)+'" target="_blank" rel="noopener" title="구글맵에서 열기">'+ICON_MAP+'</a>';
 }
 const ICON_EDIT='<svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>';
 
@@ -1602,7 +1655,7 @@ function renderShop(){
       document.querySelector('[data-shopseg="places"]').click();
       curShopTag='전체';renderShop();
       setTimeout(()=>{ drawShopMap();
-        if(p&&p.lat!=null&&shopMap){shopMap.setCenter({lat:+p.lat,lng:+p.lng});shopMap.setZoom(16);}
+        if(p&&p.lat!=null&&shopMap){shopMap.setCenter({lat:+p.lat,lng:+p.lng});shopMap.setZoom(14);}
       },80);
     };
     el.querySelector('[data-a=chk]').onclick=()=>{f.done=!f.done;save();renderShop();};
@@ -1655,13 +1708,14 @@ function renderShop(){
           ${linksHtml(f)}
           ${f.img?`<img class="thumb" src="${f.img}" alt="">`:''}
         </div>
-        <div style="display:flex;flex-direction:column;gap:2px">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex-shrink:0">
+          ${gmapBtn(f)}
           <button class="mini" data-a="ed">${ICON_EDIT}</button>
           <button class="mini" data-a="del">${ICON_TRASH}</button>
         </div>
       </div>`;
     el.onclick=(ev)=>{
-      if(ev.target.closest('button'))return;
+      if(ev.target.closest('button')||ev.target.closest('a'))return;
       if(f.lat==null){toast('위치 정보가 없어요. 수정에서 검색해 등록해 보세요');return;}
       focusPin(shopMap,shopInfo,shopObjs,m=>m.__key===(f.id||f.name),'shopMap');
     };
@@ -1689,7 +1743,9 @@ function shopForm(kind,idx){
   openSheet((edit?'수정':'추가')+' · '+(isItem?'살 것':'쇼핑 장소'),
     (isItem?'':'<div class="acbox" id="ac-shop"></div>')+
     '<div class="field"><span class="lab">이름</span><input id="f-name" value="'+esc(o.name||'')+'" placeholder="'+(isItem?'아이템 이름':'예: 돈키호테 시부야점')+'"></div>'+
-    (isItem?'':'<div id="f-pin" style="font-size:12.5px;font-weight:600;padding:0 4px 12px;margin-top:-4px;color:'+(plat!=null?'#00A661':'#B0B8C1')+'">'+(plat!=null?'✓ 지도에 표시돼요':'검색해서 고르면 지도에 표시할 수 있어요')+'</div>'+
+    (isItem?'':'<div id="f-pin" style="font-size:12.5px;font-weight:600;padding:0 4px 10px;margin-top:-4px;color:'+(plat!=null?'#00A661':'#B0B8C1')+'">'+(plat!=null?'✓ 지도에 표시돼요':'검색해서 고르면 지도에 표시할 수 있어요')+'</div>'+
+      '<div class="field"><span class="lab">구글맵</span><input id="f-gshort" value="'+esc(o.gshort||'')+'" placeholder="https://maps.app.goo.gl/… (공유 링크)" inputmode="url"></div>'+
+      '<div style="font-size:12px;color:#B0B8C1;padding:0 4px 12px;line-height:1.6">구글맵 앱에서 <b style="color:#8B95A1">공유 → 링크 복사</b>한 주소를 넣으면 지도 버튼이 구글맵으로 연결돼요</div>'+
       '<div style="font-size:12.5px;font-weight:700;color:var(--g400);padding:2px 4px 8px">태그 <span style="font-weight:500;color:var(--g300)">지도 마커 색이 달라져요</span></div>'+
       '<div class="catpick" id="f-stags"></div>')+
     (isItem?'<div class="field"><span class="lab">가격</span><input id="f-price" value="'+esc(o.price||'')+'" placeholder="예: ¥1,200 (선택)"></div>'+
@@ -1767,6 +1823,7 @@ function shopForm(kind,idx){
       if(plat==null){ for(const u of obj.links){ const c=parseGmap(u); if(c){plat=c.lat;plng=c.lng;break;} } }
       obj.lat=plat; obj.lng=plng; obj.tag=tag; obj.addr=paddr;
       obj.id=o.id||('p'+Math.random().toString(36).slice(2,9));
+      const gs=$('#f-gshort'); obj.gshort=gs?normLink(gs.value):(o.gshort||'');
     }else{
       obj.placeId=placeId;
     }
@@ -2288,11 +2345,16 @@ function renderDocs(){
           <div style="font-size:16px;font-weight:700">${esc(d.title)}</div>
           ${d.memo?`<div class="memoline">${esc(d.memo)}</div>`:''}
           ${d.link?`<a class="linkline" href="${esc(d.link)}" target="_blank" rel="noopener">${ICON_LINK}<span>${esc(hostOf(d.link))}</span></a>`:''}
+          ${d.pdf?`<a class="linkline pdfline" href="${d.pdf.data}" target="_blank" rel="noopener" download="${esc(d.pdf.name||'문서.pdf')}">${ICON_PDF}<span>${esc(d.pdf.name||'PDF 문서')}</span>${d.pdf.size?`<small>${fileSizeLabel(d.pdf.size)}</small>`:''}</a>`:''}
           ${d.img?`<img class="thumb" src="${d.img}" alt="">`:''}
         </div>
-        <button class="row-del">${ICON_TRASH}</button>
+        <div style="display:flex;flex-direction:column;gap:2px">
+          <button class="mini" data-a="ed">${ICON_EDIT}</button>
+          <button class="mini" data-a="del">${ICON_TRASH}</button>
+        </div>
       </div>`;
-    el.querySelector('.row-del').onclick=()=>{S.docs.splice(i,1);save();renderDocs();};
+    el.querySelector('[data-a=ed]').onclick=()=>docForm(i);
+    el.querySelector('[data-a=del]').onclick=()=>{S.docs.splice(i,1);save();renderDocs();};
     w.appendChild(el);
   });
 }
@@ -2354,15 +2416,80 @@ function addTripSwitcher(){
   if(cloudOn()) bar.appendChild(b);
 }
 
+/* 지도 모드: 지도가 화면을 채우고 목록은 아래 패널로 */
+let mapMode=null;                       // 'plan' | 'shop' | 'food' | null
+function setMapMode(kind,after){
+  const body=document.body;
+  if(mapMode===kind){                   // 끄기
+    body.classList.remove('mapmode','panel-down');
+    body.dataset.mapmode='';
+    mapMode=null;
+  }else{
+    body.classList.add('mapmode');
+    body.classList.remove('panel-down');
+    body.dataset.mapmode=kind;
+    mapMode=kind;
+    window.scrollTo(0,0);
+  }
+  document.querySelectorAll('.splitbtn').forEach(b=>{
+    const on=mapMode&&b.id.startsWith(mapMode);
+    b.textContent=on?'⤡':'⤢';
+    b.title=on?'지도 작게 보기':'지도 크게 보기';
+  });
+  setTimeout(()=>{ if(after)after(); },260);
+}
+function bindSplit(btnId,kind,after){
+  const btn=$(btnId);if(!btn)return;
+  btn.onclick=()=>setMapMode(kind,after);
+}
+const refitPlan=()=>fitMap();
+const refitShop=()=>{
+  const listed=curShopTag==='전체'?S.shopPlaces:S.shopPlaces.filter(p=>p.tag===curShopTag);
+  fitPoints(shopMap,listed.filter(p=>p.lat!=null),14);
+};
+const refitFood=()=>{
+  const listed=curFoodCat==='전체'?S.food:S.food.filter(f=>f.cat===curFoodCat);
+  fitPoints(foodMap,listed.filter(f=>f.lat!=null),14);
+};
+bindSplit('#planSplit','plan',refitPlan);
+bindSplit('#shopSplit','shop',refitShop);
+bindSplit('#foodSplit','food',refitFood);
+
+/* 손잡이를 누르면 목록을 내렸다 올렸다 할 수 있어요 */
+document.querySelectorAll('.panel-grip').forEach(g=>{
+  g.onclick=()=>document.body.classList.toggle('panel-down');
+});
+/* 목록을 아래로 내린 상태에서 살짝 끌어올리면 다시 펴져요 */
+document.querySelectorAll('.listpanel').forEach(p=>{
+  p.addEventListener('touchstart',e=>{p._y=e.touches[0].clientY;},{passive:true});
+  p.addEventListener('touchmove',e=>{
+    if(!document.body.classList.contains('mapmode'))return;
+    const dy=e.touches[0].clientY-(p._y||0);
+    if(dy<-24)document.body.classList.remove('panel-down');
+    else if(dy>34&&p.scrollTop<=0)document.body.classList.add('panel-down');
+  },{passive:true});
+});
+/* 다른 탭으로 가면 지도 모드 해제 */
+document.querySelectorAll('[data-nav]').forEach(b=>{
+  const prev=b.onclick;
+  b.onclick=(e)=>{
+    if(mapMode&&document.body.dataset.mapmode!==b.dataset.nav){
+      document.body.classList.remove('mapmode','panel-down');mapMode=null;
+      document.querySelectorAll('.splitbtn').forEach(x=>{x.textContent='⤢';});
+    }
+    if(prev)prev.call(b,e);
+  };
+});
+
 /* 지도 되돌리기 버튼 */
 $('#planRecenter').onclick=()=>fitMap();
 $('#shopRecenter').onclick=()=>{
   const listed=curShopTag==='전체'?S.shopPlaces:S.shopPlaces.filter(p=>p.tag===curShopTag);
-  fitPoints(shopMap,listed.filter(p=>p.lat!=null),15);
+  fitPoints(shopMap,listed.filter(p=>p.lat!=null),14);
 };
 $('#foodRecenter').onclick=()=>{
   const listed=curFoodCat==='전체'?S.food:S.food.filter(f=>f.cat===curFoodCat);
-  fitPoints(foodMap,listed.filter(f=>f.lat!=null),15);
+  fitPoints(foodMap,listed.filter(f=>f.lat!=null),14);
 };
 
 /* ---------- 시작 ---------- */
