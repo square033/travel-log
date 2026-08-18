@@ -365,7 +365,7 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
 const cloudOn = ()=>SUPABASE_URL.startsWith('http') && SUPABASE_KEY.length>20;
 /* 아이디 → 내부 이메일, 짧은 비번은 자동 패딩 (4자리도 가능) */
-const ID_DOMAIN='@tripmate.local', PW_PAD='::tripmate-9f2a';
+const ID_DOMAIN='@example.com', PW_PAD='::tripmate-9f2a';
 const toEmail=id=>id.trim().toLowerCase().replace(/[^a-z0-9._-]/g,'')+ID_DOMAIN;
 const toPw=pw=>pw+PW_PAD;
 const fromEmail=e=>(e||'').replace(ID_DOMAIN,'');
