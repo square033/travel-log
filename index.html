@@ -548,18 +548,25 @@ function initAuthUI(){
     go.disabled=false;go.textContent=authMode==='login'?'로그인':'가입하고 시작하기';
   };
   $('#au-pw').onkeydown=e=>{if(e.key==='Enter')go.click();};
-  $('#tg-out').onclick=()=>{clearSession();location.href=location.pathname;};
+  $('#tg-out').onclick=()=>{
+    try{ localStorage.removeItem(lastKey()); }catch(e){}
+    /* 예전 버전에서 남은 공용 키도 정리해요 */
+    try{ localStorage.removeItem('tripmate-lasttrip'); }catch(e){}
+    clearSession();
+    location.href=location.pathname;
+  };
   $('#tg-new').onclick=()=>createTrip();
 }
 
-const LASTKEY='tripmate-lasttrip';
+/* 마지막에 본 여행은 계정별로 따로 기억해요 (다른 계정으로 로그인하면 섞이지 않게) */
+function lastKey(){ return 'tripmate-lasttrip:'+(session&&session.user&&session.user.id?session.user.id:'anon'); }
 async function afterLogin(){
   const u=new URL(location.href);
   let code=u.searchParams.get('trip');
   const k=u.searchParams.get('k');
   if(code&&k){ try{ await api('/rest/v1/rpc/join_trip',{method:'POST',body:JSON.stringify({p_code:code,p_secret:k})}); }catch(e){} }
   /* 주소에 여행이 없으면 마지막에 보던 여행으로 복귀 */
-  if(!code){ try{ code=localStorage.getItem(LASTKEY)||''; }catch(e){} if(code) setUrlCode(code); }
+  if(!code){ try{ code=localStorage.getItem(lastKey())||''; }catch(e){} if(code) setUrlCode(code); }
   if(code){ CODE=code; return openTrip(); }
   return showTripList();
 }
@@ -604,7 +611,7 @@ function confirmDelete(code,title){
       closeSheet();
       if(Array.isArray(gone)&&gone.length===0){ toast('만든 사람만 삭제할 수 있어요'); return; }
       toast('여행을 삭제했어요');
-      try{ if(localStorage.getItem(LASTKEY)===code) localStorage.removeItem(LASTKEY); }catch(e){}
+      try{ if(localStorage.getItem(lastKey())===code) localStorage.removeItem(lastKey()); }catch(e){}
       if(CODE===code){CODE=null;history.replaceState(null,'',location.pathname);}
       showTripList();
     }catch(e){ btn.disabled=false;btn.textContent='삭제하기'; toast('삭제하지 못했어요'); }
@@ -623,11 +630,25 @@ async function createTrip(){
 }
 function setUrl(){
   setUrlCode(CODE);
-  try{ localStorage.setItem(LASTKEY,CODE); }catch(e){}
+  try{ localStorage.setItem(lastKey(),CODE); }catch(e){}
 }
 async function openTrip(){
+  /* 내가 볼 수 있는 여행인지 먼저 확인해요 */
+  if(cloudOn()){
+    try{
+      const r=await api('/rest/v1/trips?code=eq.'+encodeURIComponent(CODE)+'&select=code');
+      const rows=await r.json();
+      if(!Array.isArray(rows)||!rows.length){
+        try{ localStorage.removeItem(lastKey()); }catch(e){}
+        history.replaceState(null,'',location.pathname);
+        CODE=null;
+        toast('이 여행에 접근할 수 없어요');
+        return showTripList();
+      }
+    }catch(e){ /* 네트워크 문제면 그냥 진행 */ }
+  }
   showGate(null);
-  try{ localStorage.setItem(LASTKEY,CODE); }catch(e){}
+  try{ localStorage.setItem(lastKey(),CODE); }catch(e){}
   await load();
   boot();
 }
@@ -1554,12 +1575,14 @@ function renderShop(){
       <div style="display:flex;align-items:flex-start;gap:11px">
         <button class="check ${f.done?'on':''}" data-a="chk">${ICON_CHK}</button>
         <div style="flex:1;min-width:0">
-          ${(()=>{const p=f.placeId&&S.shopPlaces.find(x=>x.id===f.placeId);
-            if(!p)return '';
-            const st=tagStyle(p.tag);
-            return `<button class="shop-tag" data-a="goplace" style="background:${st.color}1a;color:${st.color};margin:0 0 2px">${st.emo} ${esc(p.name)}</button>`;})()}
-          <div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline">
-            <div class="it-name" style="font-size:15.5px;font-weight:700">${esc(f.name)}</div>
+          <div style="display:flex;justify-content:space-between;gap:8px;align-items:center">
+            <div style="display:flex;align-items:center;gap:6px;min-width:0;flex-wrap:wrap">
+              <span class="it-name" style="font-size:15.5px;font-weight:700">${esc(f.name)}</span>
+              ${(()=>{const p=f.placeId&&S.shopPlaces.find(x=>x.id===f.placeId);
+                if(!p)return '';
+                const st=tagStyle(p.tag);
+                return `<button class="shop-tag" data-a="goplace" style="background:${st.color}1a;color:${st.color};margin:0">${st.emo} ${esc(p.name)}</button>`;})()}
+            </div>
             ${f.price?`<div style="font-size:13.5px;font-weight:700;color:#3182F6;flex-shrink:0">${esc(f.price)}</div>`:''}
           </div>
           ${f.memo?`<div class="memoline">${esc(f.memo)}</div>`:''}
@@ -2325,7 +2348,7 @@ function addTripSwitcher(){
   const b=document.createElement('button');
   b.className='sharebtn';b.style.background='var(--g50)';b.style.color='var(--g500)';
   b.textContent='내 여행';
-  b.onclick=()=>{ if(cloudOn()){ try{localStorage.removeItem(LASTKEY);}catch(e){} history.replaceState(null,'',location.pathname); showTripList(); } };
+  b.onclick=()=>{ if(cloudOn()){ try{localStorage.removeItem(lastKey());}catch(e){} history.replaceState(null,'',location.pathname); showTripList(); } };
   if(cloudOn()) bar.appendChild(b);
 }
 
