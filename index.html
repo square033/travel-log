@@ -157,6 +157,12 @@ a{color:var(--blue);text-decoration:none}
 .toast{position:fixed;bottom:96px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--g900);color:#fff;
   padding:12px 20px;border-radius:14px;font-size:14px;font-weight:600;z-index:3000;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap}
 .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.sync{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;padding:4px 9px;border-radius:999px;background:var(--g50);color:var(--g400)}
+.sync.ok{background:#E7F8F0;color:#00A661}
+.sync.saving{background:var(--blue-bg);color:var(--blue)}
+.sync.err{background:#FEECEE;color:var(--red)}
+.sync .dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+.sharebtn{font-size:12px;font-weight:700;color:var(--blue);background:var(--blue-bg);padding:4px 10px;border-radius:999px}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -166,7 +172,10 @@ a{color:var(--blue);text-decoration:none}
 <div class="page on" id="pg-plan">
   <div class="topbar">
     <input class="title-edit" id="tripTitle" placeholder="여행 이름 ✈️" maxlength="30">
-    <div class="sub">지도에서 핀을 눌러보고, 하루 동선을 이어보세요</div>
+    <div class="sub" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <span id="syncState" class="sync">연결 중…</span>
+      <button id="shareBtn" class="sharebtn">링크 공유</button>
+    </div>
   </div>
   <div id="map"></div>
   <div class="daychips" id="dayChips"></div>
@@ -267,32 +276,113 @@ let S={
 let curDay=0, curDocCat='전체', curShopSeg='items';
 let memOnly=false;
 
-/* 저장: 깃페이지에선 localStorage, 클로드 미리보기에선 window.storage */
+/* ===== Supabase 설정 (여러 명이 같은 기록을 보려면 필수) =====
+   1) supabase.com 에서 프로젝트 생성
+   2) SQL Editor에 아래 실행:
+        create table trips (
+          code text primary key,
+          data jsonb,
+          updated_at timestamptz default now()
+        );
+        alter table trips enable row level security;
+        create policy "public rw" on trips for all using (true) with check (true);
+   3) Settings → API 에서 Project URL과 anon public 키를 아래에 붙여넣기        */
+const SUPABASE_URL = 'https://hmodjglzhubvvqlygdfl.supabase.co';      // 예: https://abcd.supabase.co
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhtb2RqZ2x6aHVidnZxbHlnZGZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwNTA3MDksImV4cCI6MjEwMjYyNjcwOX0.9-bmgGi5ECizgIgRmujCudjkXh4_mA5zEslvisnd_EE';
+
+const cloudOn = ()=>SUPABASE_URL.startsWith('http') && SUPABASE_KEY.length>20;
+/* 여행 코드: 주소 뒤 ?trip=코드 로 구분. 같은 링크를 연 사람은 같은 기록을 봐요 */
+function tripCode(){
+  const u=new URL(location.href);
+  let c=u.searchParams.get('trip');
+  if(!c){
+    c=localStorage.getItem('tripmate-lastcode')||Math.random().toString(36).slice(2,8);
+    u.searchParams.set('trip',c);
+    history.replaceState(null,'',u);
+  }
+  try{localStorage.setItem('tripmate-lastcode',c);}catch(e){}
+  return c;
+}
+const CODE=cloudOn()?tripCode():'local';
+const sbHeaders={'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json'};
+
+function setSync(state,text){
+  const el=$('#syncState');if(!el)return;
+  el.className='sync '+state;
+  el.innerHTML=`<span class="dot"></span>${text}`;
+}
+
 async function load(){
   try{
-    if(window.storage){
+    if(cloudOn()){
+      const r=await fetch(`${SUPABASE_URL}/rest/v1/trips?code=eq.${encodeURIComponent(CODE)}&select=data`,{headers:sbHeaders});
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      const rows=await r.json();
+      if(rows[0]&&rows[0].data) S={...S,...rows[0].data};
+      setSync('ok','모두와 공유 중');
+    }else if(window.storage){
       const r=await window.storage.get(KEY);
       if(r&&r.value) S={...S,...JSON.parse(r.value)};
+      setSync('','이 기기에만 저장');
     }else{
       const v=localStorage.getItem(KEY);
       if(v) S={...S,...JSON.parse(v)};
+      setSync('','이 기기에만 저장');
     }
-  }catch(e){ memOnly=!window.storage&&!window.localStorage; }
+  }catch(e){
+    setSync('err','불러오기 실패');
+    try{const v=localStorage.getItem(KEY);if(v)S={...S,...JSON.parse(v)};}catch(_){}
+  }
   if(!S.days||!S.days.length) S=Object.assign(S,{days:[{stops:[]}]});
   if(!S.cats) S.cats={budget:[],docs:[]};
 }
+
 let saveTimer=null;
 function save(){
   clearTimeout(saveTimer);
+  if(cloudOn()) setSync('saving','저장 중…');
   saveTimer=setTimeout(async()=>{
-    if(memOnly) return;
+    const v=JSON.stringify(S);
+    try{ localStorage.setItem(KEY,v); }catch(e){}   // 오프라인 대비 사본
     try{
-      const v=JSON.stringify(S);
-      if(window.storage) await window.storage.set(KEY,v);
-      else localStorage.setItem(KEY,v);
-    }catch(e){ toast('저장 공간이 가득 찼어요. 이미지를 줄여보세요'); }
-  },400);
+      if(cloudOn()){
+        const r=await fetch(`${SUPABASE_URL}/rest/v1/trips?on_conflict=code`,{
+          method:'POST',
+          headers:{...sbHeaders,'Prefer':'resolution=merge-duplicates'},
+          body:JSON.stringify({code:CODE,data:S,updated_at:new Date().toISOString()})
+        });
+        if(!r.ok) throw new Error('HTTP '+r.status);
+        setSync('ok','모두와 공유 중');
+      }else if(window.storage){
+        await window.storage.set(KEY,v);
+      }
+    }catch(e){ setSync('err','저장 실패 — 이 기기에만 보관됨'); }
+  },700);
 }
+
+/* 다른 사람이 수정한 내용 가져오기 (탭 복귀 시 + 20초마다) */
+let pulling=false;
+async function pull(){
+  if(!cloudOn()||pulling||saveTimer)return;
+  pulling=true;
+  try{
+    const r=await fetch(`${SUPABASE_URL}/rest/v1/trips?code=eq.${encodeURIComponent(CODE)}&select=data`,{headers:sbHeaders});
+    const rows=await r.json();
+    if(rows[0]&&rows[0].data){
+      const fresh=JSON.stringify(rows[0].data);
+      if(fresh!==JSON.stringify(S)){
+        S={...S,...rows[0].data};
+        if(document.activeElement&&document.activeElement.tagName==='INPUT')return;
+        renderPlan();renderFood();renderShop();renderBudget();renderDocs();
+        $('#tripTitle').value=S.title||'';
+        setSync('ok','업데이트됨');
+        setTimeout(()=>setSync('ok','모두와 공유 중'),2000);
+      }
+    }
+  }catch(e){}finally{pulling=false;}
+}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)pull();});
+setInterval(pull,20000);
 
 /* ================= helpers ================= */
 const $=s=>document.querySelector(s);
@@ -822,6 +912,23 @@ $('#addDocBtn').onclick=()=>{
 };
 
 /* ================= init ================= */
+$('#shareBtn').onclick=async()=>{
+  if(!cloudOn()){
+    openSheet('링크 공유',`<div style="font-size:13.5px;color:#6B7684;line-height:1.7;padding:4px 4px 16px">
+      아직 이 기기에만 저장되고 있어요.<br>다른 사람과 같은 기록을 보려면 파일 상단의
+      <b style="color:#191F28">SUPABASE_URL</b>과 <b style="color:#191F28">SUPABASE_KEY</b>를 설정해 주세요.</div>
+      <button class="btn btn-grey" onclick="closeSheet()">닫기</button>`);
+    return;
+  }
+  const url=location.href;
+  try{ await navigator.clipboard.writeText(url); toast('링크를 복사했어요'); }
+  catch(e){
+    openSheet('링크 공유',`<div class="field"><input value="${esc(url)}" readonly onclick="this.select()"></div>
+      <div style="font-size:12.5px;color:#8B95A1;padding:0 4px 14px">이 링크를 연 사람은 같은 기록을 보고 함께 수정할 수 있어요</div>
+      <button class="btn btn-grey" onclick="closeSheet()">닫기</button>`);
+  }
+};
+
 (async()=>{
   await load();
   $('#tripTitle').value=S.title||'';
