@@ -1170,10 +1170,12 @@ async function mountAC(boxId,cb){
       const ri=regionInfo();
       const req={input:q, sessionToken:token, language:'ko', region:ri[0],
         includedRegionCodes:[ri[0].toUpperCase()]};
-      /* 이미 찍은 핀이 있으면 그 근처를 우선해서 찾아요 */
-      const anchor=allStops()[0];
-      const c=anchor?{lat:+anchor.lat,lng:+anchor.lng}:{lat:ri[2],lng:ri[3]};
-      req.locationBias={center:c,radius:anchor?50000:300000};
+      /* 이미 찍은 핀이 있으면 그 근처를 우선해서 찾아요.
+         (구글 제한: 반경은 최대 50,000m — 핀이 없으면 국가 코드만으로 걸러요) */
+      const anchor=allStops()[0]||S.shopPlaces.find(p=>p.lat!=null)||S.food.find(f=>f.lat!=null);
+      if(anchor){
+        req.locationBias={center:{lat:+anchor.lat,lng:+anchor.lng},radius:50000};
+      }
       const {suggestions}=await AutocompleteSuggestion.fetchAutocompleteSuggestions(req);
       render((suggestions||[]).map(s=>s.placePrediction).filter(Boolean));
     }catch(e){
