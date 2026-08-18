@@ -28,26 +28,26 @@ input::placeholder,textarea::placeholder{color:var(--g300)}
 a{color:var(--blue);text-decoration:none}
 
 /* ---------- layout ---------- */
-.page{display:none;padding:0 20px 110px;min-height:100vh}
+.page{display:none;padding:0 16px 96px;min-height:100vh}
 .page.on{display:block}
-.topbar{padding:18px 0 6px}
-.topbar h1{font-size:24px;font-weight:800;letter-spacing:-0.02em}
-.topbar .sub{font-size:13px;color:var(--g400);margin-top:3px;font-weight:500}
-.title-edit{font-size:24px;font-weight:800;width:100%;letter-spacing:-0.02em}
+.topbar{padding:14px 0 5px}
+.topbar h1{font-size:21px;font-weight:800;letter-spacing:-0.02em}
+.topbar .sub{font-size:12px;color:var(--g400);margin-top:3px;font-weight:500}
+.title-edit{font-size:21px;font-weight:800;width:100%;letter-spacing:-0.02em}
 
 /* bottom nav */
 .nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;
   background:rgba(255,255,255,.94);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
   border-top:1px solid var(--g100);display:flex;z-index:1000;padding:6px 8px calc(8px + env(safe-area-inset-bottom))}
-.nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 0;border-radius:12px;color:var(--g300);font-size:10.5px;font-weight:600;transition:color .15s}
-.nav button svg{width:23px;height:23px}
+.nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;border-radius:12px;color:var(--g300);font-size:10px;font-weight:600;transition:color .15s}
+.nav button svg{width:21px;height:21px}
 .nav button.on{color:var(--g900)}
 
 /* ---------- cards & common ---------- */
-.card{background:var(--white);border-radius:var(--r-lg);padding:18px;margin-bottom:12px;box-shadow:0 1px 2px rgba(2,32,71,.04)}
-.section-t{font-size:15px;font-weight:700;color:var(--g700);margin:22px 2px 10px;display:flex;justify-content:space-between;align-items:center}
+.card{background:var(--white);border-radius:var(--r-md);padding:15px;margin-bottom:10px;box-shadow:0 1px 2px rgba(2,32,71,.04)}
+.section-t{font-size:14px;font-weight:700;color:var(--g700);margin:18px 2px 8px;display:flex;justify-content:space-between;align-items:center}
 .section-t .cnt{color:var(--blue);margin-left:5px}
-.btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:15px;border-radius:var(--r-md);font-size:16px;font-weight:700;transition:transform .1s, filter .15s}
+.btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:13px;border-radius:var(--r-sm);font-size:15px;font-weight:700;transition:transform .1s, filter .15s}
 .btn:active{transform:scale(.97)}
 .btn-blue{background:var(--blue);color:#fff}
 .btn-blue:active{background:var(--blue-dark)}
@@ -56,8 +56,8 @@ a{color:var(--blue);text-decoration:none}
 .chip-add{background:var(--g50);color:var(--g500);font-size:13px;font-weight:600;padding:8px 14px;border-radius:999px}
 .empty{padding:44px 20px;text-align:center;color:var(--g400);font-size:14px;font-weight:500;line-height:1.6}
 .empty .emo{font-size:34px;display:block;margin-bottom:10px}
-.field{background:var(--g50);border-radius:var(--r-sm);padding:13px 15px;margin-bottom:10px;display:flex;align-items:center;gap:10px}
-.field input,.field textarea{flex:1;font-size:15.5px;font-weight:500;background:none}
+.field{background:var(--g50);border-radius:var(--r-sm);padding:11px 13px;margin-bottom:8px;display:flex;align-items:center;gap:9px}
+.field input,.field textarea{flex:1;font-size:15px;font-weight:500;background:none;min-width:0}
 .field textarea{resize:none;line-height:1.5}
 .field .lab{font-size:13px;font-weight:600;color:var(--g400);flex-shrink:0;min-width:44px}
 .row-del{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--g300);flex-shrink:0}
@@ -74,7 +74,9 @@ a{color:var(--blue);text-decoration:none}
 .done .it-name{text-decoration:line-through;color:var(--g300)}
 
 /* ---------- itinerary ---------- */
-#map{height:44vh;min-height:300px;border-radius:var(--r-lg);margin-bottom:14px;z-index:1;box-shadow:0 1px 3px rgba(2,32,71,.06)}
+#shopMap{height:32vh;min-height:210px;max-height:330px;border-radius:var(--r-md);margin:12px 0;z-index:1;box-shadow:0 1px 3px rgba(2,32,71,.06);background:#fff}
+#shopMap .map-off{height:100%}
+#map{height:38vh;min-height:240px;max-height:380px;border-radius:var(--r-md);margin-bottom:12px;z-index:1;box-shadow:0 1px 3px rgba(2,32,71,.06)}
 .daychips{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 12px;scrollbar-width:none}
 .daychips::-webkit-scrollbar{display:none}
 .dchip{flex-shrink:0;padding:8px 15px;border-radius:16px;background:var(--white);color:var(--g500);font-size:14px;font-weight:700;box-shadow:0 1px 2px rgba(2,32,71,.05);transition:all .15s;line-height:1.25;text-align:center}
@@ -104,24 +106,24 @@ a{color:var(--blue);text-decoration:none}
 .day-del{font-size:12.5px;font-weight:600;color:var(--g400)}
 
 /* ---------- segmented ---------- */
-.seg{display:flex;background:var(--g100);border-radius:14px;padding:4px;margin:14px 0 4px}
-.seg button{flex:1;padding:10px;border-radius:11px;font-size:14.5px;font-weight:700;color:var(--g400);transition:all .15s}
+.seg{display:flex;background:var(--g100);border-radius:12px;padding:3px;margin:12px 0 4px}
+.seg button{flex:1;padding:9px;border-radius:10px;font-size:14px;font-weight:700;color:var(--g400);transition:all .15s}
 .seg button.on{background:#fff;color:var(--g900);box-shadow:0 1px 3px rgba(2,32,71,.08)}
 
 /* ---------- budget ---------- */
-.bud-hero{background:linear-gradient(135deg,#2B5CE0 0%,#1B3FA8 55%,#3182F6 100%);
-  border-radius:var(--r-lg);padding:24px 22px;color:#fff;margin-bottom:12px;
+.bud-hero{background:linear-gradient(135deg,#2B5CE0 0%,#1B3FA8 55%,#122A6E 100%);
+  border-radius:var(--r-md);padding:20px 18px;color:#fff;margin-bottom:10px;
   box-shadow:0 6px 20px rgba(18,42,110,.30)}
 .bud-hero .cap{font-size:13px;font-weight:600;color:rgba(255,255,255,.72)}
-.bud-hero .amt{font-size:30px;font-weight:800;margin-top:4px;letter-spacing:-0.02em}
+.bud-hero .amt{font-size:26px;font-weight:800;margin-top:3px;letter-spacing:-0.02em}
 .bud-hero .amt.over{color:#FFC2C8}
 .bud-bar{height:8px;background:rgba(255,255,255,.22);border-radius:99px;margin-top:18px;overflow:hidden}
 .bud-fill{height:100%;background:#fff;border-radius:99px;transition:width .4s cubic-bezier(.2,.8,.2,1)}
 .bud-fill.over{background:#FF8B95}
 .bud-meta{display:flex;justify-content:space-between;font-size:12.5px;font-weight:600;color:rgba(255,255,255,.72);margin-top:9px}
-.exp-row{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--g50)}
+.exp-row{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--g50)}
 .exp-row:last-child{border-bottom:none}
-.exp-ic{width:40px;height:40px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;background:var(--g50)}
+.exp-ic{width:36px;height:36px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;background:var(--g50)}
 .exp-name{font-size:15px;font-weight:600;flex:1;min-width:0}
 .exp-cat{font-size:12px;color:var(--g400);font-weight:500;margin-top:1px}
 .exp-amt{font-size:15.5px;font-weight:700;flex-shrink:0}
@@ -140,10 +142,10 @@ a{color:var(--blue);text-decoration:none}
   background:#fff;border-radius:24px 24px 0 0;z-index:2001;transition:transform .3s cubic-bezier(.2,.8,.2,1);
   max-height:88vh;display:flex;flex-direction:column}
 .sheet.on{transform:translate(-50%,0)}
-.sheet-hd{padding:20px 22px 8px;flex-shrink:0}
+.sheet-hd{padding:16px 18px 6px;flex-shrink:0}
 .sheet-grip{width:38px;height:4px;background:var(--g200);border-radius:99px;margin:0 auto 16px}
-.sheet-hd h2{font-size:19px;font-weight:800}
-.sheet-bd{padding:12px 22px calc(24px + env(safe-area-inset-bottom));overflow-y:auto}
+.sheet-hd h2{font-size:17.5px;font-weight:800}
+.sheet-bd{padding:10px 18px calc(20px + env(safe-area-inset-bottom));overflow-y:auto}
 .sr{display:flex;align-items:center;gap:12px;padding:13px 4px;border-bottom:1px solid var(--g50);width:100%;text-align:left}
 .sr:active{background:var(--g25)}
 .sr .pin{width:36px;height:36px;border-radius:12px;background:var(--blue-bg);color:var(--blue);display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -157,6 +159,13 @@ a{color:var(--blue);text-decoration:none}
 #map .map-off{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:#fff;border-radius:var(--r-lg);color:var(--g400);font-size:13.5px;font-weight:600;text-align:center;line-height:1.6;padding:20px}
 #map .map-off .emo{font-size:32px}
 .gm-style{font-family:inherit!important}
+#foodMap{height:34vh;min-height:220px;max-height:340px;border-radius:var(--r-md);margin-bottom:10px;background:#fff;box-shadow:0 1px 3px rgba(2,32,71,.06)}
+#foodMap .map-off{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--g400);font-size:13px;font-weight:600;text-align:center;padding:16px}
+.linkchip{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;padding:5px 10px;border-radius:999px;background:var(--g50);color:var(--g600);margin-top:6px}
+#shopMap{height:34vh;min-height:220px;max-height:340px;border-radius:var(--r-md);margin-bottom:10px;background:#fff;box-shadow:0 1px 3px rgba(2,32,71,.06)}
+#shopMap .map-off{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--g400);font-size:13px;font-weight:600;text-align:center;padding:16px}
+.tagpin{display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;border:2.5px solid #fff;box-shadow:0 2px 8px rgba(2,32,71,.35);font-size:15px;cursor:pointer}
+.shop-tag{display:inline-block;font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:999px;margin-bottom:4px}
 .acbox{margin-bottom:10px}
 .acbox .sr{border-bottom:1px solid var(--g50)}
 .acbox .searching{padding:16px;font-size:13px;line-height:1.6}
@@ -179,14 +188,34 @@ a{color:var(--blue);text-decoration:none}
 .share-pick{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:6px}
 .share-pick button{padding:8px 13px;border-radius:999px;background:var(--g50);font-size:13.5px;font-weight:600;color:var(--g400);display:flex;align-items:center;gap:5px}
 .share-pick button.on{background:var(--blue-bg);color:var(--blue)}
+.sflag{font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;margin-top:5px;display:inline-block}
+.sflag.todo{background:#FFF4E5;color:#E8890C}
+.sflag.done{background:#E7F8F0;color:#00A661}
+.exp-row.exp-settled .exp-name,.exp-row.exp-settled .exp-amt{color:var(--g400)}
+.exp-row.exp-settled .exp-ic{opacity:.55}
+.sbadge{font-size:11.5px;font-weight:800;padding:4px 10px;border-radius:999px;flex-shrink:0}
+.sbadge.ok{background:#E7F8F0;color:#00A661}
+.sbadge.todo{background:#FFF4E5;color:#E8890C}
+.sbadge.wait{background:var(--g50);color:var(--g400)}
+.sbnote{font-size:12.5px;color:var(--g400);font-weight:500}
+.settle-row.settled{opacity:.5}
+.settle-row.settled .amt{color:var(--g400);text-decoration:line-through}
 .settle-row{display:flex;align-items:center;gap:10px;padding:13px 0;border-bottom:1px solid var(--g50);font-size:14.5px;font-weight:600}
 .settle-row:last-child{border-bottom:none}
 .settle-row .arw{color:var(--g300);flex-shrink:0}
 .settle-row .amt{margin-left:auto;font-weight:800;color:var(--blue)}
+.settle-row.settled{opacity:.5}
+.settle-row.settled .amt{color:var(--g400);text-decoration:line-through}
+.settle-row .check{width:22px;height:22px;border-radius:7px}
+.settle-row .check svg{width:12px;height:12px}
+.exp-row .mini{width:28px;height:28px}
+.settle-badge{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:700;padding:7px 12px;border-radius:999px;margin-bottom:10px}
+.settle-badge.ok{background:#E7F8F0;color:#00A661}
+.settle-badge.wait{background:#FFF4E5;color:#C77700}
 .exp-who{font-size:11.5px;color:var(--g400);font-weight:500;margin-top:2px}
 .gate{position:fixed;inset:0;background:var(--g50);z-index:2500;display:none;overflow-y:auto;padding:0 20px}
 .gate.on{display:block}
-.gate-in{max-width:480px;margin:0 auto;padding:64px 0 40px}
+.gate-in{max-width:480px;margin:0 auto;padding:48px 0 36px}
 .gate-logo{font-size:44px;margin-bottom:10px}
 .gate-t{font-size:26px;font-weight:800;letter-spacing:-0.02em}
 .gate-s{font-size:14px;color:var(--g400);font-weight:500;margin:6px 0 24px}
@@ -202,6 +231,22 @@ a{color:var(--blue);text-decoration:none}
 .sync.err{background:#FEECEE;color:var(--red)}
 .sync .dot{width:6px;height:6px;border-radius:50%;background:currentColor}
 .sharebtn{font-size:12px;font-weight:700;color:var(--blue);background:var(--blue-bg);padding:4px 10px;border-radius:999px}
+/* 작은 화면에서 한 단계 더 축소 */
+@media (max-width:390px){
+  .page{padding:0 13px 92px}
+  .card{padding:13px}
+  .topbar h1,.title-edit{font-size:20px}
+  .bud-hero .amt{font-size:24px}
+  .bud-hero{padding:18px 16px}
+  .field{padding:10px 12px}
+  .field input,.field textarea{font-size:14.5px}
+  .btn{padding:12px;font-size:14.5px}
+  #map{height:34vh;min-height:220px}
+  .stop-name{font-size:15px}
+  .dchip{padding:7px 13px;font-size:13px}
+  .nav button{font-size:9.5px}
+  .nav button svg{width:20px;height:20px}
+}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -235,6 +280,7 @@ a{color:var(--blue);text-decoration:none}
 <!-- ===== 맛집 ===== -->
 <div class="page" id="pg-food">
   <div class="topbar"><h1>맛집 리스트</h1><div class="sub">가고 싶은 곳, 계속 모아두세요</div></div>
+  <div id="foodMap"></div>
   <div class="doc-tabs" id="foodTabs"></div>
   <div id="foodList"></div>
   <button class="btn btn-blue" id="addFoodBtn" style="margin-top:6px">맛집 추가하기</button>
@@ -252,6 +298,8 @@ a{color:var(--blue);text-decoration:none}
     <button class="btn btn-blue" id="addShopItemBtn" style="margin-top:6px">살 것 추가하기</button>
   </div>
   <div id="shopPlacesWrap" style="display:none">
+    <div id="shopMap"></div>
+    <div class="doc-tabs" id="shopTabs"></div>
     <div id="shopPlaceList"></div>
     <button class="btn btn-blue" id="addShopPlaceBtn" style="margin-top:6px">쇼핑 장소 추가하기</button>
   </div>
@@ -272,6 +320,7 @@ a{color:var(--blue);text-decoration:none}
   </div>
   <div id="budListWrap">
   <div class="section-t">지출 내역<span class="cnt" id="expCnt"></span></div>
+  <div id="settleBadge"></div>
   <div class="doc-tabs" id="expWhoTabs"></div>
   <div class="card" id="expList"></div>
   <button class="btn btn-blue" id="addExpBtn">지출 추가하기</button>
@@ -354,10 +403,11 @@ let S={
   food:[],                    // {name, memo, link, img, done}
   shopItems:[],               // {name, price, memo, link, img, done}
   shopPlaces:[],              // {name, memo, link}
-  budget:{total:0, expenses:[]}, // expenses: {name, amount, cat}
+  budget:{total:0, expenses:[], settlements:[]}, // expenses:{name,amount,cat,payer,shares} / settlements:{from,to,amt}
   docs:[],                    // {cat, title, memo, link, img}
-  cats:{budget:[], docs:[], food:[]},  // 사용자 추가 카테고리
-  members:[]                  // 함께 가는 사람 [{id,name}]
+  cats:{budget:[], docs:[], food:[], shop:[]},  // 사용자 추가 카테고리
+  members:[],                 // 함께 가는 사람 [{id,name}]
+  region:'jp'                 // 검색 우선 지역
 };
 let curDay=0, curDocCat='전체', curShopSeg='items', curExpWho='all';
 let memOnly=false;
@@ -595,7 +645,12 @@ async function load(){
   if(!S.days||!S.days.length) S=Object.assign(S,{days:[{stops:[]}]});
   if(!S.cats) S.cats={budget:[],docs:[],food:[]};
   if(!S.cats.food) S.cats.food=[];
+  if(!S.cats.shop) S.cats.shop=[];
+  (S.shopPlaces||[]).forEach(p=>{ if(!p.id)p.id='p'+Math.random().toString(36).slice(2,9); });
   if(!S.members) S.members=[];
+  if(!S.region) S.region='jp';
+  if(!S.budget.settlements) S.budget.settlements=[];
+  if(!S.budget.settled) S.budget.settled={};
 }
 let saveTimer=null;
 function save(){
@@ -683,6 +738,7 @@ document.querySelectorAll('[data-nav]').forEach(b=>{
     b.classList.add('on');
     $('#pg-'+b.dataset.nav).classList.add('on');
     if(b.dataset.nav==='plan') setTimeout(fitMap,60);
+    if(b.dataset.nav==='food') setTimeout(drawFoodMap,60);
   };
 });
 /* ================= 지도 & 일정 ================= */
@@ -716,14 +772,15 @@ function loadGmaps(){
         google.maps.importLibrary('marker')
       ]);
       GM={Map,InfoWindow,Polyline,LatLngBounds,AdvancedMarkerElement};
+      const ri0=regionInfo();
       map=new Map($('#map'),{
-        center:{lat:35.68,lng:139.76},zoom:11,mapId:'DEMO_MAP_ID',
+        center:{lat:ri0[2],lng:ri0[3]},zoom:ri0[4],mapId:'DEMO_MAP_ID',
         disableDefaultUI:true,zoomControl:true,gestureHandling:'greedy'
       });
       infoWin=new InfoWindow();
       gmapReady=true;
       acQueue.forEach(f=>f());acQueue=[];
-      drawMap();fitMap();
+      drawMap();fitMap();drawShopMap();drawFoodMap();
     }catch(e){
       mapOff('지도를 여는 중 문제가 생겼어요',(e&&e.message)||'알 수 없는 오류','키 다시 입력하기');
     }
@@ -815,15 +872,152 @@ function drawMap(){
     });
   });
 }
+function allStops(){
+  const out=[];
+  S.days.forEach(d=>d.stops.forEach(s=>{ if(s.lat!=null)out.push(s); }));
+  return out;
+}
 function fitMap(){
   if(!gmapReady)return;
-  const pts=S.days[curDay].stops.filter(s=>s.lat!=null);
-  if(!pts.length)return;
+  if(curDay>=S.days.length)curDay=Math.max(0,S.days.length-1);
+  const day=S.days[curDay]||{stops:[]};
+  /* 선택한 날에 장소가 있으면 그 날 기준, 없으면 전체 일정 기준으로 이동 */
+  let pts=day.stops.filter(s=>s.lat!=null);
+  if(!pts.length)pts=allStops();
+  if(!pts.length){
+    const ri=regionInfo();
+    map.setCenter({lat:ri[2],lng:ri[3]});map.setZoom(ri[4]);
+    return;
+  }
   if(pts.length===1){map.setCenter({lat:+pts[0].lat,lng:+pts[0].lng});map.setZoom(14);return;}
   const b=new GM.LatLngBounds();
   pts.forEach(s=>b.extend({lat:+s.lat,lng:+s.lng}));
   map.fitBounds(b,{top:46,bottom:46,left:46,right:46});
 }
+/* ---------- 쇼핑 태그 ---------- */
+const SHOP_TAGS=[
+  ['👕 옷','#3182F6','👕'],
+  ['🎰 쿠지','#F04452','🎰'],
+  ['🧸 피규어','#7048E8','🧸'],
+  ['💄 화장품','#F35CA6','💄'],
+  ['🍫 식품','#FF9F0A','🍫'],
+  ['📚 굿즈','#00C473','📚'],
+  ['🏬 잡화','#0BB8CC','🏬']
+];
+function shopTags(){ return [...SHOP_TAGS.map(t=>t[0]), ...S.cats.shop.map(c=>'🏷️ '+c)]; }
+function tagStyle(tag){
+  const f=SHOP_TAGS.find(t=>t[0]===tag);
+  if(f)return {color:f[1],emo:f[2]};
+  const cs=['#8B95A1','#5B34E8','#E8590C','#2B8A3E'];
+  const idx=Math.max(0,shopTags().indexOf(tag));
+  return {color:cs[idx%cs.length],emo:emojiOf(tag,'🛍️')};
+}
+let curShopTag='전체';
+
+/* ---------- 쇼핑 장소 지도 ---------- */
+let shopMap=null, shopObjs=[], shopInfo=null;
+function drawShopMap(){
+  const box=document.getElementById('shopMap');
+  if(!box)return;
+  if(!gmapReady){
+    box.innerHTML='<div class="map-off"><span class="emo">🗺️</span><b style="color:var(--g600)">지도를 준비하는 중이에요</b></div>';
+    return;
+  }
+  const listed=curShopTag==='전체'?S.shopPlaces:S.shopPlaces.filter(p=>p.tag===curShopTag);
+  const pts=listed.filter(p=>p.lat!=null);
+  if(!shopMap){
+    box.innerHTML='';
+    const ri=regionInfo();
+    shopMap=new GM.Map(box,{center:{lat:ri[2],lng:ri[3]},zoom:ri[4],mapId:'DEMO_MAP_ID',
+      disableDefaultUI:true,zoomControl:true,gestureHandling:'greedy'});
+    shopInfo=new GM.InfoWindow();
+  }
+  shopObjs.forEach(m=>{m.map=null;});shopObjs=[];
+  if(!pts.length){
+    const ri=regionInfo();
+    shopMap.setCenter({lat:ri[2],lng:ri[3]});shopMap.setZoom(ri[4]);
+    return;
+  }
+  pts.forEach((p)=>{
+    const st=tagStyle(p.tag);
+    const el=document.createElement('div');
+    el.className='tagpin';
+    el.style.background=st.color;
+    el.textContent=st.emo;
+    const m=new GM.AdvancedMarkerElement({position:{lat:+p.lat,lng:+p.lng},map:shopMap,content:el,title:p.name});
+    m.addListener('click',()=>{
+      shopInfo.setContent('<div style="font-family:inherit;padding:2px 4px">'+
+        (p.tag?'<span style="font-size:11px;font-weight:700;color:'+st.color+'">'+esc(p.tag)+'</span><br>':'')+
+        '<b style="font-size:14px">'+esc(p.name)+'</b>'+
+        (p.memo?'<br><span style="font-size:12px;color:#6B7684">'+esc(p.memo)+'</span>':'')+'</div>');
+      shopInfo.open({map:shopMap,anchor:m});
+    });
+    shopObjs.push(m);
+  });
+  if(pts.length===1){shopMap.setCenter({lat:+pts[0].lat,lng:+pts[0].lng});shopMap.setZoom(14);}
+  else{
+    const b=new GM.LatLngBounds();
+    pts.forEach(p=>b.extend({lat:+p.lat,lng:+p.lng}));
+    shopMap.fitBounds(b,{top:40,bottom:40,left:40,right:40});
+  }
+}
+
+/* ---------- 맛집 지도 ---------- */
+const FOOD_COLORS={'🍣 일식':'#F04452','🍝 양식':'#FF9F0A','🍜 중식':'#E8590C','🇰🇷 한식':'#00C473',
+  '☕ 카페':'#8B5E3C','🍰 디저트':'#F35CA6','🍺 술집':'#7048E8','🍽️ 기타':'#4E5968'};
+function emojiOf(label,fallback){
+  const first=(label||'').trim().split(' ')[0];
+  return first&&!/^[A-Za-z0-9가-힣]/.test(first)?first:fallback;
+}
+function foodStyle(cat){
+  return {color:FOOD_COLORS[cat]||'#0BB8CC', emo:emojiOf(cat,'🍽️')};
+}
+let foodMap=null, foodObjs=[], foodInfo=null;
+function drawFoodMap(){
+  const box=document.getElementById('foodMap');
+  if(!box)return;
+  if(!gmapReady){
+    box.innerHTML='<div class="map-off"><span class="emo">🗺️</span><b style="color:var(--g600)">지도를 준비하는 중이에요</b></div>';
+    return;
+  }
+  const listed=curFoodCat==='전체'?S.food:S.food.filter(f=>f.cat===curFoodCat);
+  const pts=listed.filter(f=>f.lat!=null);
+  if(!foodMap){
+    box.innerHTML='';
+    const ri=regionInfo();
+    foodMap=new GM.Map(box,{center:{lat:ri[2],lng:ri[3]},zoom:ri[4],mapId:'DEMO_MAP_ID',
+      disableDefaultUI:true,zoomControl:true,gestureHandling:'greedy'});
+    foodInfo=new GM.InfoWindow();
+  }
+  foodObjs.forEach(m=>{m.map=null;});foodObjs=[];
+  if(!pts.length){
+    const ri=regionInfo();
+    foodMap.setCenter({lat:ri[2],lng:ri[3]});foodMap.setZoom(ri[4]);
+    return;
+  }
+  pts.forEach(f=>{
+    const st=foodStyle(f.cat);
+    const el=document.createElement('div');
+    el.className='tagpin';el.style.background=st.color;el.textContent=st.emo;
+    if(f.done)el.style.opacity='.5';
+    const m=new GM.AdvancedMarkerElement({position:{lat:+f.lat,lng:+f.lng},map:foodMap,content:el,title:f.name});
+    m.addListener('click',()=>{
+      foodInfo.setContent('<div style="font-family:inherit;padding:2px 4px">'+
+        (f.cat?'<span style="font-size:11px;font-weight:700;color:'+st.color+'">'+esc(f.cat)+'</span><br>':'')+
+        '<b style="font-size:14px">'+esc(f.name)+'</b>'+
+        (f.memo?'<br><span style="font-size:12px;color:#6B7684">'+esc(f.memo)+'</span>':'')+'</div>');
+      foodInfo.open({map:foodMap,anchor:m});
+    });
+    foodObjs.push(m);
+  });
+  if(pts.length===1){foodMap.setCenter({lat:+pts[0].lat,lng:+pts[0].lng});foodMap.setZoom(14);}
+  else{
+    const b=new GM.LatLngBounds();
+    pts.forEach(f=>b.extend({lat:+f.lat,lng:+f.lng}));
+    foodMap.fitBounds(b,{top:40,bottom:40,left:40,right:40});
+  }
+}
+
 /* Places 자동완성: 구글 위젯 대신 AutocompleteSuggestion API로 직접 검색·렌더
    (위젯 드롭다운이 바텀시트에 가려지는 문제를 피하고, 오류도 화면에 표시해요) */
 async function mountAC(boxId,cb){
@@ -879,9 +1073,14 @@ async function mountAC(boxId,cb){
         res.innerHTML='<div class="searching" style="color:#F04452">Places API (New)를 활성화해 주세요</div>';return;
       }
       if(!token)token=new AutocompleteSessionToken();
-      const {suggestions}=await AutocompleteSuggestion.fetchAutocompleteSuggestions({
-        input:q, sessionToken:token, language:'ko', region:'kr'
-      });
+      const ri=regionInfo();
+      const req={input:q, sessionToken:token, language:'ko', region:ri[0],
+        includedRegionCodes:[ri[0].toUpperCase()]};
+      /* 이미 찍은 핀이 있으면 그 근처를 우선해서 찾아요 */
+      const anchor=allStops()[0];
+      const c=anchor?{lat:+anchor.lat,lng:+anchor.lng}:{lat:ri[2],lng:ri[3]};
+      req.locationBias={center:c,radius:anchor?50000:300000};
+      const {suggestions}=await AutocompleteSuggestion.fetchAutocompleteSuggestions(req);
       render((suggestions||[]).map(s=>s.placePrediction).filter(Boolean));
     }catch(e){
       res.innerHTML='<div class="searching" style="color:#F04452">검색 실패: '+esc(e.message||'알 수 없는 오류')+'<br><span style="color:#B0B8C1">Places API (New) 활성화와 키 제한을 확인해 주세요</span></div>';
@@ -897,6 +1096,19 @@ async function mountAC(boxId,cb){
     acQueue.push(()=>{res.innerHTML='';});
   }
 }
+
+/* ---------- 지역 ---------- */
+const REGIONS=[
+  ['jp','🇯🇵 일본',36.2,138.2,5],
+  ['kr','🇰🇷 한국',36.5,127.8,6],
+  ['tw','🇹🇼 대만',23.7,121.0,7],
+  ['vn','🇻🇳 베트남',16.0,107.5,5],
+  ['th','🇹🇭 태국',13.7,100.5,6],
+  ['sg','🇸🇬 싱가포르',1.35,103.8,10],
+  ['us','🇺🇸 미국',39.8,-98.6,4],
+  ['fr','🇪🇺 유럽',48.8,9.0,4]
+];
+function regionInfo(){ return REGIONS.find(r=>r[0]===S.region)||REGIONS[0]; }
 
 /* ---------- 날짜 ---------- */
 const WD=['일','월','화','수','목','금','토'];
@@ -919,12 +1131,23 @@ function iso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'
 
 $('#dateBtn').onclick=()=>{
   const endD=S.startDate?iso(dayDate(S.days.length-1)):'';
-  openSheet('여행 날짜',
+  openSheet('여행 설정',
+    '<div style="font-size:12.5px;font-weight:700;color:var(--g400);padding:2px 4px 8px">여행 지역</div>'+
+    '<div class="catpick" id="d-region">'+REGIONS.map(r=>'<button data-r="'+r[0]+'"'+(r[0]===S.region?' class="on"':'')+'>'+r[1]+'</button>').join('')+'</div>'+
+    '<div style="font-size:12px;color:#B0B8C1;padding:0 4px 16px">장소 검색이 이 지역을 우선해서 찾아줘요</div>'+
     '<div class="field"><span class="lab">출발</span><input type="date" id="d-start" value="'+(S.startDate||'')+'"></div>'+
     '<div class="field"><span class="lab">도착</span><input type="date" id="d-end" value="'+endD+'"></div>'+
     '<div id="d-info" style="font-size:12.5px;font-weight:600;color:#8B95A1;padding:0 4px 14px"></div>'+
     '<button class="btn btn-blue" id="d-save">저장하기</button>'+
     (S.startDate?'<button class="btn btn-grey" id="d-clear" style="margin-top:8px">날짜 없이 쓰기</button>':''));
+  const rbox=$('#d-region');
+  rbox.querySelectorAll('button').forEach(btn=>btn.onclick=()=>{
+    rbox.querySelectorAll('button').forEach(x=>x.classList.remove('on'));
+    btn.classList.add('on'); S.region=btn.dataset.r; save();
+    if(gmapReady&&!S.days.some(d=>d.stops.some(s=>s.lat!=null))){
+      const ri=regionInfo(); map.setCenter({lat:ri[2],lng:ri[3]}); map.setZoom(ri[4]);
+    }
+  });
   const a=$('#d-start'), b=$('#d-end'), info=$('#d-info');
   const calc=()=>{
     if(!a.value||!b.value){info.textContent='출발일과 도착일을 골라주세요';return 0;}
@@ -937,7 +1160,8 @@ $('#dateBtn').onclick=()=>{
   };
   a.onchange=b.onchange=calc; calc();
   $('#d-save').onclick=()=>{
-    const n=calc(); if(!n)return;
+    const n=calc();
+    if(!n){ save(); closeSheet(); toast('여행 지역을 저장했어요'); return; }
     S.startDate=a.value;
     while(S.days.length<n) S.days.push({stops:[]});
     if(S.days.length>n){
@@ -1136,7 +1360,7 @@ function renderFood(){
     tabs.forEach(c=>{
       const b=document.createElement('button');
       b.className='dchip'+(c===curFoodCat?' on':'');b.textContent=c;
-      b.onclick=()=>{curFoodCat=c;renderFood();};
+      b.onclick=()=>{curFoodCat=c;renderFood();drawFoodMap();};
       tw.appendChild(b);
     });
   }
@@ -1186,20 +1410,24 @@ function foodForm(pre){
   let img='';
   let fcat=curFoodCat!=='전체'?curFoodCat:'🍣 일식';
   buildCatPick($('#f-fcats'), foodCats, fcat, c=>fcat=c, v=>S.cats.food.push(v));
+  let flat=pre.lat!=null?pre.lat:null, flng=pre.lng!=null?pre.lng:null, faddr=pre.addr||'';
   mountAC('ac-food',p=>{
+    flat=p.lat;flng=p.lng;faddr=p.addr||'';
     $('#f-name').value=p.name;
     if(p.gmap)$('#f-gmap').value=p.gmap;
     if(!$('#f-memo').value&&p.addr)$('#f-memo').placeholder=p.addr;
-    toast('구글맵 링크를 자동으로 채웠어요');
+    toast('위치를 찾았어요 · 지도에 표시돼요');
   });
   $('#f-img').onclick=()=>pickImage(d=>{img=d;$('#f-img').innerHTML=`<img src="${d}" alt="">`;});
   $('#f-save').onclick=()=>{
     const name=$('#f-name').value.trim();if(!name){toast('가게 이름을 입력해 주세요');return;}
-    S.food.unshift({name, cat:fcat,
-      gmap:normLink($('#f-gmap').value),
+    const gmapUrl=normLink($('#f-gmap').value);
+    if(flat==null){ const c=parseGmap(gmapUrl); if(c){flat=c.lat;flng=c.lng;} }
+    S.food.unshift({name, cat:fcat, lat:flat, lng:flng, addr:faddr,
+      gmap:gmapUrl,
       link:normLink($('#f-link').value),
       memo:$('#f-memo').value.trim(), img, done:false});
-    save();closeSheet();renderFood();toast('맛집을 추가했어요');
+    save();closeSheet();renderFood();drawFoodMap();toast('맛집을 추가했어요');
   };
 }
 
@@ -1210,76 +1438,217 @@ document.querySelectorAll('[data-shopseg]').forEach(b=>{
     b.classList.add('on');curShopSeg=b.dataset.shopseg;
     $('#shopItemsWrap').style.display=curShopSeg==='items'?'':'none';
     $('#shopPlacesWrap').style.display=curShopSeg==='places'?'':'none';
+    if(curShopSeg==='places')setTimeout(drawShopMap,50);
   };
 });
+/* 링크는 여러 개 저장 가능 (예전 단일 link 데이터도 그대로 읽어요) */
+function linksOf(o){
+  if(Array.isArray(o.links))return o.links.filter(Boolean);
+  return o.link?[o.link]:[];
+}
+function linksHtml(o){
+  const ls=linksOf(o);
+  if(!ls.length)return '';
+  return '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:2px">'+
+    ls.map(u=>'<a class="linkline" href="'+esc(u)+'" target="_blank" rel="noopener">'+ICON_LINK+'<span>'+esc(hostOf(u))+'</span></a>').join('')+'</div>';
+}
+const ICON_EDIT='<svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>';
+
 function renderShop(){
   const iw=$('#shopItemList');iw.innerHTML='';
   if(!S.shopItems.length){iw.innerHTML='<div class="card"><div class="empty"><span class="emo">🛍️</span>살 것이 아직 없어요<br>릴스에서 본 그 아이템, 여기 저장해 두세요</div></div>';}
   S.shopItems.forEach((f,i)=>{
     const el=document.createElement('div');el.className='card'+(f.done?' done':'');
     el.innerHTML=`
-      <div style="display:flex;align-items:flex-start;gap:12px">
+      <div style="display:flex;align-items:flex-start;gap:11px">
         <button class="check ${f.done?'on':''}" data-a="chk">${ICON_CHK}</button>
         <div style="flex:1;min-width:0">
           <div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline">
-            <div class="it-name" style="font-size:16px;font-weight:700">${esc(f.name)}</div>
-            ${f.price?`<div style="font-size:14px;font-weight:700;color:#3182F6;flex-shrink:0">${esc(f.price)}</div>`:''}
+            <div class="it-name" style="font-size:15.5px;font-weight:700">${esc(f.name)}</div>
+            ${f.price?`<div style="font-size:13.5px;font-weight:700;color:#3182F6;flex-shrink:0">${esc(f.price)}</div>`:''}
           </div>
           ${f.memo?`<div class="memoline">${esc(f.memo)}</div>`:''}
-          ${f.link?`<a class="linkline" href="${esc(f.link)}" target="_blank" rel="noopener">${ICON_LINK}<span>${esc(hostOf(f.link))}</span></a>`:''}
+          ${(()=>{const p=f.placeId&&S.shopPlaces.find(x=>x.id===f.placeId);
+            if(!p)return '';
+            const st=tagStyle(p.tag);
+            return `<button class="linkchip" data-a="goplace" style="background:${st.color}1a;color:${st.color}">${st.emo} ${esc(p.name)}</button>`;})()}
+          ${linksHtml(f)}
           ${f.img?`<img class="thumb" src="${f.img}" alt="">`:''}
         </div>
-        <button class="row-del" data-a="del">${ICON_TRASH}</button>
+        <div style="display:flex;flex-direction:column;gap:2px">
+          <button class="mini" data-a="ed">${ICON_EDIT}</button>
+          <button class="mini" data-a="del">${ICON_TRASH}</button>
+        </div>
       </div>`;
+    const gp=el.querySelector('[data-a=goplace]');
+    if(gp)gp.onclick=()=>{
+      const p=S.shopPlaces.find(x=>x.id===f.placeId);
+      document.querySelector('[data-shopseg="places"]').click();
+      curShopTag='전체';renderShop();
+      setTimeout(()=>{ drawShopMap();
+        if(p&&p.lat!=null&&shopMap){shopMap.setCenter({lat:+p.lat,lng:+p.lng});shopMap.setZoom(16);}
+      },80);
+    };
     el.querySelector('[data-a=chk]').onclick=()=>{f.done=!f.done;save();renderShop();};
+    el.querySelector('[data-a=ed]').onclick=()=>shopForm('item',i);
     el.querySelector('[data-a=del]').onclick=()=>{S.shopItems.splice(i,1);save();renderShop();};
     iw.appendChild(el);
   });
+  /* 태그 필터 탭 */
+  const usedTags=[...new Set(S.shopPlaces.map(p=>p.tag).filter(Boolean))];
+  const stw=$('#shopTabs');stw.innerHTML='';
+  if(usedTags.length){
+    if(curShopTag!=='전체'&&!usedTags.includes(curShopTag))curShopTag='전체';
+    ['전체',...usedTags].forEach(t=>{
+      const b=document.createElement('button');
+      b.className='dchip'+(t===curShopTag?' on':'');b.textContent=t;
+      if(t===curShopTag&&t!=='전체')b.style.background=tagStyle(t).color;
+      b.onclick=()=>{curShopTag=t;renderShop();drawShopMap();};
+      stw.appendChild(b);
+    });
+  }else{ curShopTag='전체'; }
+
   const pw=$('#shopPlaceList');pw.innerHTML='';
   if(!S.shopPlaces.length){pw.innerHTML='<div class="card"><div class="empty"><span class="emo">🏬</span>쇼핑 장소가 아직 없어요<br>돈키호테, 편집숍… 갈 곳을 적어두세요</div></div>';}
-  S.shopPlaces.forEach((f,i)=>{
+  const plist=curShopTag==='전체'?S.shopPlaces:S.shopPlaces.filter(p=>p.tag===curShopTag);
+  if(S.shopPlaces.length&&!plist.length){pw.innerHTML='<div class="card"><div class="empty">이 태그에는 아직 없어요</div></div>';}
+  plist.forEach((f)=>{
+    const i=S.shopPlaces.indexOf(f);
+    const st=tagStyle(f.tag);
     const el=document.createElement('div');el.className='card';
     el.innerHTML=`
-      <div style="display:flex;align-items:flex-start;gap:12px">
-        <div style="width:40px;height:40px;border-radius:13px;background:var(--g50);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🏬</div>
+      <div style="display:flex;align-items:flex-start;gap:11px">
+        <div style="width:36px;height:36px;border-radius:12px;background:${f.tag?st.color+'1a':'var(--g50)'};display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0">${f.tag?st.emo:'🏬'}</div>
         <div style="flex:1;min-width:0">
-          <div style="font-size:16px;font-weight:700">${esc(f.name)}</div>
+          ${f.tag?`<div class="shop-tag" style="background:${st.color}1a;color:${st.color}">${esc(f.tag)}</div>`:''}
+          <div style="font-size:15.5px;font-weight:700">${esc(f.name)}</div>
+          ${(()=>{const items=S.shopItems.filter(x=>x.placeId===f.id);
+            if(!items.length)return '';
+            const left=items.filter(x=>!x.done).length;
+            return `<button class="linkchip" data-a="goitems">🛍️ 살 것 ${items.length}개${left?` · ${left}개 남음`:' · 모두 완료'}</button>`;})()}
+          ${f.addr?`<div class="stop-addr">${esc(f.addr)}</div>`:''}
           ${f.memo?`<div class="memoline">${esc(f.memo)}</div>`:''}
-          ${f.link?`<a class="linkline" href="${esc(f.link)}" target="_blank" rel="noopener">${ICON_LINK}<span>${esc(hostOf(f.link))}</span></a>`:''}
+          ${linksHtml(f)}
+          ${f.img?`<img class="thumb" src="${f.img}" alt="">`:''}
         </div>
-        <button class="row-del" data-a="del">${ICON_TRASH}</button>
+        <div style="display:flex;flex-direction:column;gap:2px">
+          <button class="mini" data-a="ed">${ICON_EDIT}</button>
+          <button class="mini" data-a="del">${ICON_TRASH}</button>
+        </div>
       </div>`;
-    el.querySelector('[data-a=del]').onclick=()=>{S.shopPlaces.splice(i,1);save();renderShop();};
+    const gi=el.querySelector('[data-a=goitems]');
+    if(gi)gi.onclick=()=>{ document.querySelector('[data-shopseg="items"]').click(); toast(esc(f.name)+'에서 살 것들이에요'); };
+    el.querySelector('[data-a=ed]').onclick=()=>shopForm('place',i);
+    el.querySelector('[data-a=del]').onclick=()=>{
+      S.shopItems.forEach(x=>{ if(x.placeId===f.id)x.placeId=''; });
+      S.shopPlaces.splice(i,1);save();renderShop();drawShopMap();};
     pw.appendChild(el);
   });
 }
-$('#addShopItemBtn').onclick=()=>itemForm({title:'살 것 추가',hasImg:true,hasLink:true,hasPrice:true,namePh:'아이템 이름',memoPh:'예: 3층 화장품 코너, 색상은 03호',
-  onSave:o=>{S.shopItems.unshift({...o,done:false});save();renderShop();toast('살 것에 추가했어요');}});
-$('#addShopPlaceBtn').onclick=()=>itemForm({title:'쇼핑 장소 추가',hasLink:true,namePh:'예: 돈키호테 시부야점',memoPh:'예: 면세 카운터 2층, 24시간',
-  onSave:o=>{S.shopPlaces.unshift(o);save();renderShop();toast('쇼핑 장소를 추가했어요');}});
 
-/* 공용 입력 시트 */
-function itemForm({title,namePh,memoPh,hasLink,hasImg,hasPrice,onSave}){
-  let img='';
-  openSheet(title,`
-    <div class="field"><span class="lab">이름</span><input id="f-name" placeholder="${namePh}"></div>
-    ${hasPrice?'<div class="field"><span class="lab">가격</span><input id="f-price" placeholder="예: ¥1,200 (선택)"></div>':''}
-    ${hasLink?'<div class="field"><span class="lab">링크</span><input id="f-link" placeholder="블로그·릴스 링크 붙여넣기 (선택)" inputmode="url"></div>':''}
-    <div class="field"><span class="lab">메모</span><textarea id="f-memo" rows="2" placeholder="${memoPh}"></textarea></div>
-    ${hasImg?'<button class="imgpick" id="f-img">📷 사진 첨부하기 (선택)</button>':''}
-    <button class="btn btn-blue" id="f-save">추가하기</button>
-  `);
-  if(hasImg)$('#f-img').onclick=()=>pickImage(d=>{img=d;$('#f-img').innerHTML=`<img src="${d}" alt="">`;});
+/* 살 것 / 쇼핑 장소 공용 폼 (추가 + 수정, 링크 여러 개) */
+function shopForm(kind,idx){
+  const isItem=kind==='item';
+  const arr=isItem?S.shopItems:S.shopPlaces;
+  const edit=idx!=null;
+  const o=edit?arr[idx]:{name:'',price:'',memo:'',img:'',links:[]};
+  let links=linksOf(o).slice();
+  if(!links.length)links=[''];
+  let img=o.img||'';
+  let plat=o.lat!=null?o.lat:null, plng=o.lng!=null?o.lng:null, paddr=o.addr||'';
+  let tag=o.tag||(curShopTag!=='전체'?curShopTag:SHOP_TAGS[0][0]);
+  openSheet((edit?'수정':'추가')+' · '+(isItem?'살 것':'쇼핑 장소'),
+    (isItem?'':'<div class="acbox" id="ac-shop"></div>')+
+    '<div class="field"><span class="lab">이름</span><input id="f-name" value="'+esc(o.name||'')+'" placeholder="'+(isItem?'아이템 이름':'예: 돈키호테 시부야점')+'"></div>'+
+    (isItem?'':'<div id="f-pin" style="font-size:12.5px;font-weight:600;padding:0 4px 12px;margin-top:-4px;color:'+(plat!=null?'#00A661':'#B0B8C1')+'">'+(plat!=null?'✓ 지도에 표시돼요':'검색해서 고르면 지도에 표시할 수 있어요')+'</div>'+
+      '<div style="font-size:12.5px;font-weight:700;color:var(--g400);padding:2px 4px 8px">태그 <span style="font-weight:500;color:var(--g300)">지도 마커 색이 달라져요</span></div>'+
+      '<div class="catpick" id="f-stags"></div>')+
+    (isItem?'<div class="field"><span class="lab">가격</span><input id="f-price" value="'+esc(o.price||'')+'" placeholder="예: ¥1,200 (선택)"></div>'+
+      '<div style="font-size:12.5px;font-weight:700;color:var(--g400);padding:2px 4px 8px">어디서 살까요 <span style="font-weight:500;color:var(--g300)">쇼핑 장소와 연결</span></div>'+
+      '<div class="catpick" id="f-place"></div>':'')+
+    '<div style="font-size:12.5px;font-weight:700;color:var(--g400);padding:2px 4px 8px">링크 <span style="font-weight:500;color:var(--g300)">블로그·릴스·쇼핑몰 등</span></div>'+
+    '<div id="f-links"></div>'+
+    '<button class="chip-add" id="f-addlink" style="margin-bottom:12px">＋ 링크 추가</button>'+
+    '<div class="field"><span class="lab">메모</span><textarea id="f-memo" rows="2" placeholder="'+(isItem?'예: 3층 화장품 코너, 색상은 03호':'예: 면세 카운터 2층, 24시간')+'">'+esc(o.memo||'')+'</textarea></div>'+
+    '<button class="imgpick" id="f-img">'+(img?'<img src="'+img+'" alt="">':'📷 사진 첨부하기 (선택)')+'</button>'+
+    '<button class="btn btn-blue" id="f-save">'+(edit?'저장하기':'추가하기')+'</button>');
+
+  let placeId=o.placeId||'';
+  if(isItem){
+    const pbox=$('#f-place');
+    const drawPlaces=()=>{
+      pbox.innerHTML='';
+      const none=document.createElement('button');
+      none.textContent='미정';
+      if(!placeId)none.classList.add('on');
+      none.onclick=()=>{placeId='';drawPlaces();};
+      pbox.appendChild(none);
+      S.shopPlaces.forEach(p=>{
+        const b=document.createElement('button');
+        b.textContent=(p.tag?tagStyle(p.tag).emo+' ':'')+p.name;
+        if(placeId===p.id)b.classList.add('on');
+        b.onclick=()=>{placeId=p.id;drawPlaces();};
+        pbox.appendChild(b);
+      });
+      if(!S.shopPlaces.length){
+        const hint=document.createElement('div');
+        hint.style.cssText='font-size:12px;color:var(--g300);font-weight:500;padding:2px 4px';
+        hint.textContent='쇼핑 장소를 먼저 추가하면 연결할 수 있어요';
+        pbox.appendChild(hint);
+      }
+    };
+    drawPlaces();
+  }
+  if(!isItem){
+    buildCatPick($('#f-stags'), shopTags, tag, c=>tag=c, v=>S.cats.shop.push(v));
+    mountAC('ac-shop',p=>{
+      plat=p.lat;plng=p.lng;paddr=p.addr||'';
+      $('#f-name').value=p.name;
+      const st=$('#f-pin');st.textContent='✓ '+(p.addr||'위치를 찾았어요')+' — 지도에 표시돼요';st.style.color='#00A661';
+      if(p.gmap&&!links.filter(Boolean).length){links[0]=p.gmap;drawLinks();}
+    });
+  }
+  const lbox=$('#f-links');
+  const drawLinks=()=>{
+    lbox.innerHTML='';
+    links.forEach((u,li)=>{
+      const row=document.createElement('div');row.className='field';
+      row.innerHTML='<input value="'+esc(u)+'" placeholder="https://…" inputmode="url" autocapitalize="off" spellcheck="false">'+
+        (links.length>1?'<button class="row-del" style="width:28px;height:28px">✕</button>':'');
+      const inp=row.querySelector('input');
+      inp.oninput=()=>{links[li]=inp.value;};
+      const del=row.querySelector('.row-del');
+      if(del)del.onclick=()=>{links.splice(li,1);drawLinks();};
+      lbox.appendChild(row);
+    });
+  };
+  drawLinks();
+  $('#f-addlink').onclick=()=>{links.push('');drawLinks();
+    const inputs=lbox.querySelectorAll('input');inputs[inputs.length-1].focus();};
+  $('#f-img').onclick=()=>pickImage(d=>{img=d;$('#f-img').innerHTML='<img src="'+d+'" alt="">';});
   $('#f-save').onclick=()=>{
-    const name=$('#f-name').value.trim();if(!name){toast('이름을 입력해 주세요');return;}
-    onSave({name,
+    const name=$('#f-name').value.trim();
+    if(!name){toast('이름을 입력해 주세요');return;}
+    const obj={name,
       memo:$('#f-memo').value.trim(),
-      link:hasLink?normLink($('#f-link').value):'',
-      price:hasPrice?$('#f-price').value.trim():'',
-      img});
-    closeSheet();
+      links:links.map(normLink).filter(Boolean),
+      price:isItem?$('#f-price').value.trim():'',
+      img, done:edit?!!o.done:false};
+    if(!isItem){
+      if(plat==null){ for(const u of obj.links){ const c=parseGmap(u); if(c){plat=c.lat;plng=c.lng;break;} } }
+      obj.lat=plat; obj.lng=plng; obj.tag=tag; obj.addr=paddr;
+      obj.id=o.id||('p'+Math.random().toString(36).slice(2,9));
+    }else{
+      obj.placeId=placeId;
+    }
+    if(edit)arr[idx]=obj; else arr.unshift(obj);
+    save();closeSheet();renderShop();drawMap();drawShopMap();
+    toast(edit?'수정했어요':(isItem?'살 것에 추가했어요':'쇼핑 장소를 추가했어요'));
   };
 }
+$('#addShopItemBtn').onclick=()=>shopForm('item',null);
+$('#addShopPlaceBtn').onclick=()=>shopForm('place',null);
+
 /* ================= 예산 ================= */
 const CATS=[['🍽️','식비'],['🛍️','쇼핑'],['🚕','교통'],['🏨','숙소'],['🎫','관광'],['💳','기타']];
 function budgetCats(){return [...CATS.map(c=>c[1]), ...S.cats.budget];}
@@ -1331,6 +1700,17 @@ function renderBudget(){
   const pct=total?Math.min(100,spent/total*100):0;
   $('#budFill').style.width=pct+'%';
   $('#budFill').classList.toggle('over',remain<0);
+  /* 정산 상태 뱃지 */
+  const sb=$('#settleBadge');sb.innerHTML='';
+  if(S.members.length&&S.budget.expenses.length){
+    const {tx}=settleData();
+    const isDone=t=>{const r=S.budget.settled&&S.budget.settled[t.from+'>'+t.to];return !!r&&(r.amt==null||r.amt===t.amt);};
+    const done=tx.filter(isDone).length;
+    const allDone=tx.length&&done===tx.length;
+    sb.innerHTML='<div class="settle-badge '+(allDone?'ok':(tx.length?'wait':'ok'))+'">'+
+      (tx.length?(allDone?'✓ 정산 완료':'⏳ 정산 대기 '+(tx.length-done)+'건 · '+won(tx.reduce((a,t)=>a+(isDone(t)?0:t.amt),0)))
+                :'✓ 주고받을 돈 없음')+'</div>';
+  }
   /* 인원 필터 탭 */
   const tw=$('#expWhoTabs');tw.innerHTML='';
   if(S.members.length){
@@ -1372,17 +1752,27 @@ function renderBudget(){
     const n=(e.shares&&e.shares.filter(id=>memById(id)).length)||1;
     const shown=mine?Math.round((+e.amount||0)/n):(+e.amount||0);
     const split=mine&&n>1;
-    const el=document.createElement('div');el.className='exp-row';
+    const canSettle=!!(e.payer&&memById(e.payer)&&e.shares&&e.shares.filter(id=>memById(id)).length);
+    const el=document.createElement('div');el.className='exp-row'+(e.settled?' exp-settled':'');
     el.innerHTML=`
       <div class="exp-ic">${catIcon(e.cat)}</div>
       <div style="flex:1;min-width:0"><div class="exp-name">${esc(e.name)}</div>
-        <div class="exp-cat">${esc(e.cat||'기타')}${e.payer&&memById(e.payer)?' · '+esc(memName(e.payer))+' 결제':''}${isShared(e)?' · 공동 '+e.shares.length+'명':(e.shares&&e.shares.length===1&&memById(e.shares[0])?' · 개인':'')}</div></div>
+        <div class="exp-cat">${esc(e.cat||'기타')}${e.payer&&memById(e.payer)?' · '+esc(memName(e.payer))+' 결제':''}${isShared(e)?' · 공동 '+e.shares.length+'명':(e.shares&&e.shares.length===1&&memById(e.shares[0])?' · 개인':'')}</div>
+        ${canSettle?`<button class="sflag ${e.settled?'done':'todo'}" data-a="flag">${e.settled?'✓ 정산 완료':'정산 미완료'}</button>`:''}
+      </div>
       <div style="text-align:right;flex-shrink:0">
         <div class="exp-amt">-${won(shown)}</div>
         ${split?`<div class="exp-who" style="margin-top:1px">${won(+e.amount||0)} ÷ ${n}</div>`:''}
       </div>
-      <button class="row-del">${ICON_TRASH}</button>`;
-    el.querySelector('.row-del').onclick=()=>{S.budget.expenses.splice(i,1);save();renderBudget();renderSettle();};
+      <div style="display:flex;flex-direction:column;gap:1px">
+        <button class="mini" data-a="ed">${ICON_EDIT}</button>
+        <button class="mini" data-a="del">${ICON_TRASH}</button>
+      </div>`;
+    const fb=el.querySelector('[data-a=flag]');
+    if(fb)fb.onclick=()=>{e.settled=!e.settled;save();renderBudget();renderSettle();
+      toast(e.settled?'정산 완료로 표시했어요':'정산 미완료로 되돌렸어요');};
+    el.querySelector('[data-a=ed]').onclick=()=>expForm(i);
+    el.querySelector('[data-a=del]').onclick=()=>{S.budget.expenses.splice(i,1);save();renderBudget();renderSettle();};
     w.appendChild(el);
   });
 }
@@ -1442,6 +1832,7 @@ function settleData(){
     const payer=e.payer;
     const shares=(e.shares&&e.shares.length)?e.shares.filter(id=>memById(id)):[];
     if(!payer||!memById(payer)||!shares.length)return;   // 정산 대상 아님
+    if(e.settled)return;                                  // 이미 정산 끝난 지출은 제외
     bal[payer]+=amt;
     const per=amt/shares.length;
     const shared=shares.length>=2;
@@ -1449,6 +1840,11 @@ function settleData(){
       bal[id]-=per; personal[id]+=per;
       if(shared)shareCost[id]+=per; else ownCost[id]+=per;
     }});
+  });
+  /* 이미 주고받은 정산은 잔액에서 차감 → 남은 것만 다시 계산돼요 */
+  (S.budget.settlements||[]).forEach(t=>{
+    if(bal[t.from]!=null)bal[t.from]+=t.amt;
+    if(bal[t.to]!=null)bal[t.to]-=t.amt;
   });
   /* 최소 송금 계산 */
   const cred=[],debt=[];
@@ -1526,10 +1922,45 @@ function renderSettle(){
       pw.appendChild(el);
     });
   }
-  /* 정산 결과 */
+  /* 정산 결과: 지출의 정산 플래그를 기준으로 계산 */
   const sw=$('#settleList');sw.innerHTML='';
+  const target=S.budget.expenses.filter(e=>e.payer&&memById(e.payer)&&e.shares&&e.shares.filter(id=>memById(id)).length);
+  const unsettled=target.filter(e=>!e.settled);
+  const settledCnt=target.length-unsettled.length;
+  const unsettledSum=unsettled.reduce((a,e)=>a+(+e.amount||0),0);
+  const leftAmt=tx.reduce((a,t)=>a+t.amt,0);
+
+  const badge=document.createElement('div');
+  badge.style.cssText='display:flex;align-items:center;gap:8px;padding:0 0 12px;flex-wrap:wrap';
+  if(!S.members.length||!target.length){
+    badge.innerHTML='<span class="sbadge wait">준비 중</span><span class="sbnote">사람과 지출을 등록하면 계산돼요</span>';
+  }else if(!unsettled.length){
+    badge.innerHTML='<span class="sbadge ok">정산 완료</span><span class="sbnote">'+target.length+'건 모두 정산했어요</span>';
+  }else if(!tx.length){
+    badge.innerHTML='<span class="sbadge ok">정산 완료</span><span class="sbnote">더 주고받을 돈이 없어요</span>';
+  }else{
+    badge.innerHTML='<span class="sbadge todo">정산 필요</span><span class="sbnote">미정산 '+unsettled.length+'건 · '+won(leftAmt)+' 주고받으면 끝나요</span>';
+  }
+  sw.appendChild(badge);
+
+  if(target.length){
+    const head=document.createElement('div');
+    head.style.cssText='display:flex;justify-content:space-between;align-items:center;gap:8px;padding:0 0 10px;border-bottom:1px solid var(--g50);margin-bottom:6px';
+    head.innerHTML='<span style="font-size:13px;font-weight:600;color:var(--g500)">'+
+        target.length+'건 중 <b style="color:var(--g900)">'+settledCnt+'건</b> 정산 완료'+
+        (unsettled.length?' · 미정산 '+won(unsettledSum):'')+'</span>'+
+      (unsettled.length?'<button class="chip-add" id="markAll">모두 완료</button>':
+        (settledCnt?'<button class="chip-add" id="unmarkAll">모두 해제</button>':''));
+    sw.appendChild(head);
+    const ma=head.querySelector('#markAll'), ua=head.querySelector('#unmarkAll');
+    if(ma)ma.onclick=()=>{target.forEach(e=>e.settled=true);save();renderBudget();renderSettle();toast('모두 정산 완료로 표시했어요');};
+    if(ua)ua.onclick=()=>{target.forEach(e=>e.settled=false);save();renderBudget();renderSettle();};
+  }
+
   if(!tx.length){
-    sw.innerHTML='<div class="empty"><span class="emo">🤝</span>'+(S.members.length?'주고받을 돈이 없어요':'사람과 지출을 등록하면 정산해 드려요')+'</div>';
+    const e=document.createElement('div');e.className='empty';
+    e.innerHTML='<span class="emo">🤝</span>'+(target.length?'지금은 주고받을 돈이 없어요':'사람과 지출을 등록하면 정산해 드려요');
+    sw.appendChild(e);
   }else{
     tx.forEach(t=>{
       const el=document.createElement('div');el.className='settle-row';
@@ -1538,18 +1969,25 @@ function renderSettle(){
         '<span class="amt">'+won(t.amt)+'</span>';
       sw.appendChild(el);
     });
+    const note=document.createElement('div');
+    note.style.cssText='font-size:11.5px;color:var(--g400);font-weight:500;padding:12px 0 2px;line-height:1.6';
+    note.textContent='미정산 지출만 계산한 결과예요. 지출 탭에서 정산이 끝난 항목을 완료로 바꾸면 바로 다시 계산돼요.';
+    sw.appendChild(note);
   }
 }
 
-/* ---------- 지출 추가 ---------- */
-$('#addExpBtn').onclick=()=>{
-  let cat='기타';
-  let payer=S.members.length?S.members[0].id:'';
-  let shares=S.members.map(m=>m.id);
-  openSheet('지출 추가',
+/* ---------- 지출 추가/수정 ---------- */
+$('#addExpBtn').onclick=()=>expForm(null);
+function expForm(idx){
+  const edit=idx!=null;
+  const o=edit?S.budget.expenses[idx]:null;
+  let cat=edit?(o.cat||'기타'):'기타';
+  let payer=edit?(o.payer||''):(S.members.length?S.members[0].id:'');
+  let shares=edit?(o.shares||[]).slice():S.members.map(m=>m.id);
+  openSheet(edit?'지출 수정':'지출 추가',
     '<div class="catpick" id="f-cats" data-kind="budget"></div>'+
-    '<div class="field"><span class="lab">내용</span><input id="f-name" placeholder="예: 이치란 라멘"></div>'+
-    '<div class="field"><span class="lab">금액</span><input id="f-amt" inputmode="numeric" placeholder="원화 기준 숫자만"></div>'+
+    '<div class="field"><span class="lab">내용</span><input id="f-name" value="'+(edit?esc(o.name):'')+'" placeholder="예: 이치란 라멘"></div>'+
+    '<div class="field"><span class="lab">금액</span><input id="f-amt" inputmode="numeric" value="'+(edit?(+o.amount||''):'')+'" placeholder="원화 기준 숫자만"></div>'+
     (S.members.length?
       '<div style="font-size:12.5px;font-weight:700;color:var(--g400);padding:6px 4px 8px">누가 냈나요</div>'+
       '<div class="payer-pick" id="f-payer"></div>'+
@@ -1557,7 +1995,7 @@ $('#addExpBtn').onclick=()=>{
       '<div class="share-pick" id="f-shares"></div>'+
       '<div style="display:flex;gap:8px;margin:4px 0 14px"><button class="chip-add" id="f-all">모두 선택</button><button class="chip-add" id="f-none">모두 해제</button></div>'
       :'<div style="font-size:12.5px;color:#B0B8C1;padding:6px 4px 14px">정산 탭에서 사람을 추가하면 더치페이 계산도 할 수 있어요</div>')+
-    '<button class="btn btn-blue" id="f-save">추가하기</button>');
+    '<button class="btn btn-blue" id="f-save">'+(edit?'저장하기':'추가하기')+'</button>');
   buildCatPick($('#f-cats'), budgetCats, cat, c=>cat=c, v=>S.cats.budget.push(v));
   if(S.members.length){
     const pbox=$('#f-payer'), sbox=$('#f-shares');
@@ -1578,10 +2016,18 @@ $('#addExpBtn').onclick=()=>{
   $('#f-save').onclick=()=>{
     const name=$('#f-name').value.trim(), amt=+($('#f-amt').value.replace(/[^0-9]/g,''));
     if(!name||!amt){toast('내용과 금액을 입력해 주세요');return;}
-    S.budget.expenses.unshift({name,amount:amt,cat,payer,shares:shares.slice()});
+    const obj={name,amount:amt,cat,payer,shares:shares.slice()};
+    if(edit){
+      const changed=(+o.amount!==+obj.amount)||(o.payer!==obj.payer)||
+        JSON.stringify((o.shares||[]).slice().sort())!==JSON.stringify((obj.shares||[]).slice().sort());
+      obj.settled=changed?false:!!o.settled;   // 금액·분담이 바뀌면 다시 미정산으로
+      S.budget.expenses[idx]=obj;
+      if(changed&&o.settled)toast('금액이 바뀌어 정산 미완료로 되돌렸어요');
+    } else S.budget.expenses.unshift(obj);
     save();closeSheet();renderBudget();renderSettle();
+    if(edit)toast('수정했어요 · 정산 결과에 바로 반영됐어요');
   };
-};
+}
 
 /* ================= 정보 ================= */
 const DOC_CATS=['전체','✈️ 항공권','🏨 호텔','🎫 티켓·예약','🚌 교통·공항버스','📌 기타'];
