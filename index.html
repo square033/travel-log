@@ -143,6 +143,13 @@ a{color:var(--blue);text-decoration:none}
 .mapwrap{position:relative;margin-bottom:10px}
 .mapwrap #map{margin-bottom:0}
 .mini.gmapmini{background:#E7F8F0;color:#00A661}
+.dragging{opacity:.94;z-index:50;position:relative;box-shadow:0 8px 24px rgba(2,32,71,.22)!important;
+  border-radius:var(--r-md);transition:none!important}
+.sorting{cursor:grabbing}
+.sorting [data-sort]:not(.dragging){transition:transform .18s cubic-bezier(.2,.8,.2,1)}
+.draghandle{display:flex;align-items:center;justify-content:center;width:28px;height:30px;color:var(--g300);
+  cursor:grab;touch-action:none;flex-shrink:0}
+.draghandle:active{cursor:grabbing;color:var(--g500)}
 .photo-toggle{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;
   padding:6px 11px;border-radius:999px;background:var(--g50);color:var(--g500);margin-top:7px}
 .photo-toggle.on{background:var(--blue-bg);color:var(--blue)}
@@ -574,7 +581,6 @@ end; $$;
    2) Authentication → Sign In / Providers → Email 에서
       "Confirm email" 끄기 (아이디 로그인이라 인증메일이 필요 없어요)
    3) Settings → API 에서 아래 두 값 붙여넣기                       */
-   
 const SUPABASE_URL = 'https://hmodjglzhubvvqlygdfl.supabase.co';      // 예: https://abcd.supabase.co
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhtb2RqZ2x6aHVidnZxbHlnZGZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwNTA3MDksImV4cCI6MjEwMjYyNjcwOX0.9-bmgGi5ECizgIgRmujCudjkXh4_mA5zEslvisnd_EE'; 
 
@@ -1603,7 +1609,7 @@ function renderStops(){
   const w=$('#stopList');w.innerHTML='';
   if(!d.stops.length){w.innerHTML='<div class="empty"><span class="emo">🗺️</span>아직 장소가 없어요<br>아래에서 첫 장소를 추가해 보세요</div>';return;}
   d.stops.forEach((s,i)=>{
-    const el=document.createElement('div');el.className='stop';
+    const el=document.createElement('div');el.className='stop';el.dataset.sort=i;
     el.innerHTML=`
       <div class="stop-rail"><div class="stop-dot" style="background:${c}">${i+1}</div><div class="stop-line"></div></div>
       <div class="stop-body">
@@ -1616,16 +1622,14 @@ function renderStops(){
           </div>
           <div class="stop-acts">
             ${i>0&&s.lat!=null&&d.stops[i-1].lat!=null?`<button class="mini dirmini" data-a="dir" title="이전 장소에서 길찾기">🧭</button>`:''}
-            <button class="mini" data-a="up">${ICON_UP}</button>
-            <button class="mini" data-a="dn">${ICON_DN}</button>
+            <button class="draghandle" data-drag title="끌어서 순서 변경"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M8 7h.01M8 12h.01M8 17h.01M16 7h.01M16 12h.01M16 17h.01" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button>
             <button class="mini" data-a="mv"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M14 4h5v5M19 4l-7 7M10 20H5v-5M5 20l7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
             <button class="mini" data-a="ed"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></button>
             <button class="mini" data-a="del">${ICON_TRASH}</button>
           </div>
         </div>
       </div>`;
-    el.querySelector('[data-a=up]').onclick=()=>{if(i===0)return;[d.stops[i-1],d.stops[i]]=[d.stops[i],d.stops[i-1]];save();renderPlan();};
-    el.querySelector('[data-a=dn]').onclick=()=>{if(i===d.stops.length-1)return;[d.stops[i+1],d.stops[i]]=[d.stops[i],d.stops[i+1]];save();renderPlan();};
+
     el.querySelector('.stop-body').onclick=(ev)=>{
       if(ev.target.closest('.stop-acts'))return;
       if(s.lat==null){toast('위치 정보가 없어요. 수정에서 검색해 등록해 보세요');return;}
@@ -1646,7 +1650,13 @@ function renderStops(){
     w.appendChild(el);
   });
 }
-function renderPlan(){renderDays();renderStops();updateDayDirBtn();drawMap();}
+function renderPlan(){
+  renderDays();renderStops();updateDayDirBtn();drawMap();
+  makeSortable($('#stopList'),order=>{
+    S.days[curDay].stops=applyOrder(S.days[curDay].stops,order);
+    save();renderPlan();fitMap();
+  });
+}
 
 $('#dayDir').onclick=()=>{
   const pts=(S.days[curDay]||{stops:[]}).stops.filter(x=>x.lat!=null);
@@ -1781,7 +1791,7 @@ function renderFood(){
   if(!list.length){w.innerHTML='<div class="card"><div class="empty">'+(foodQuery?'검색 결과가 없어요':'이 카테고리에는 아직 없어요')+'</div></div>';return;}
   list.forEach((f)=>{
     const i=S.food.indexOf(f);
-    const el=document.createElement('div');el.className='card'+(f.done?' done':'');
+    const el=document.createElement('div');el.className='card'+(f.done?' done':'');el.dataset.sort=i;
     el.innerHTML=`
       <div style="display:flex;align-items:flex-start;gap:12px">
         <button class="check ${f.done?'on':''}" data-a="chk">${ICON_CHK}</button>
@@ -1793,6 +1803,7 @@ function renderFood(){
           ${attachHtml(f,true)}
         </div>
         <div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex-shrink:0">
+          <button class="draghandle" data-drag title="끌어서 순서 변경"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M8 7h.01M8 12h.01M8 17h.01M16 7h.01M16 12h.01M16 17h.01" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button>
           ${gmapBtn(f)}
           <button class="mini" data-a="ed">${ICON_EDIT}</button>
           <button class="mini" data-a="del">${ICON_TRASH}</button>
@@ -1808,6 +1819,10 @@ function renderFood(){
     el.querySelector('[data-a=ed]').onclick=()=>foodForm(null,i);
     el.querySelector('[data-a=del]').onclick=()=>{S.food.splice(i,1);save();renderFood();drawFoodMap();};
     w.appendChild(el);
+  });
+  makeSortable(w,order=>{
+    if(foodQuery||curFoodCat!=='전체'){toast('필터를 해제하면 순서를 바꿀 수 있어요');renderFood();return;}
+    S.food=applyOrder(S.food,order);save();renderFood();drawFoodMap();
   });
 }
 
@@ -1968,7 +1983,7 @@ function renderShop(){
   if(S.shopItems.length&&!ilist.length){iw.innerHTML='<div class="card"><div class="empty">검색 결과가 없어요</div></div>';}
   ilist.forEach((f)=>{
     const i=S.shopItems.indexOf(f);
-    const el=document.createElement('div');el.className='card'+(f.done?' done':'');
+    const el=document.createElement('div');el.className='card'+(f.done?' done':'');el.dataset.sort=i;
     el.innerHTML=`
       <div style="display:flex;align-items:flex-start;gap:11px">
         <button class="check ${f.done?'on':''}" data-a="chk">${ICON_CHK}</button>
@@ -1987,7 +2002,8 @@ function renderShop(){
           ${linksHtml(f)}
           ${attachHtml(f,true)}
         </div>
-        <div style="display:flex;flex-direction:column;gap:2px">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+          <button class="draghandle" data-drag title="끌어서 순서 변경"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M8 7h.01M8 12h.01M8 17h.01M16 7h.01M16 12h.01M16 17h.01" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button>
           <button class="mini" data-a="ed">${ICON_EDIT}</button>
           <button class="mini" data-a="del">${ICON_TRASH}</button>
         </div>
@@ -2006,6 +2022,10 @@ function renderShop(){
     el.querySelector('[data-a=ed]').onclick=()=>shopForm('item',i);
     el.querySelector('[data-a=del]').onclick=()=>{S.shopItems.splice(i,1);save();renderShop();};
     iw.appendChild(el);
+  });
+  makeSortable(iw,order=>{
+    if(itemQuery){toast('검색을 해제하면 순서를 바꿀 수 있어요');renderShop();return;}
+    S.shopItems=applyOrder(S.shopItems,order);save();renderShop();
   });
   /* 태그 필터 탭 */
   const usedTags=[...new Set(S.shopPlaces.map(p=>p.tag).filter(Boolean))];
@@ -2035,7 +2055,7 @@ function renderShop(){
   plist.forEach((f)=>{
     const i=S.shopPlaces.indexOf(f);
     const st=tagStyle(f.tag);
-    const el=document.createElement('div');el.className='card';
+    const el=document.createElement('div');el.className='card';el.dataset.sort=i;
     el.innerHTML=`
       <div style="display:flex;align-items:flex-start;gap:11px">
         <div style="width:36px;height:36px;border-radius:12px;background:${f.tag?st.color+'1a':'var(--g50)'};display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0">${f.tag?st.emo:'🏬'}</div>
@@ -2054,6 +2074,7 @@ function renderShop(){
           ${attachHtml(f,true)}
         </div>
         <div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex-shrink:0">
+          <button class="draghandle" data-drag title="끌어서 순서 변경"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M8 7h.01M8 12h.01M8 17h.01M16 7h.01M16 12h.01M16 17h.01" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button>
           ${gmapBtn(f)}
           <button class="mini" data-a="ed">${ICON_EDIT}</button>
           <button class="mini" data-a="del">${ICON_TRASH}</button>
@@ -2072,6 +2093,10 @@ function renderShop(){
       S.shopItems.forEach(x=>{ if(x.placeId===f.id)x.placeId=''; });
       S.shopPlaces.splice(i,1);save();renderShop();drawShopMap();};
     pw.appendChild(el);
+  });
+  makeSortable(pw,order=>{
+    if(shopQuery||curShopTag!=='전체'){toast('필터를 해제하면 순서를 바꿀 수 있어요');renderShop();return;}
+    S.shopPlaces=applyOrder(S.shopPlaces,order);save();renderShop();drawShopMap();
   });
 }
 
@@ -2694,7 +2719,8 @@ function renderDocs(){
           ${d.pdf?`<a class="linkline pdfline" href="${d.pdf.data}" target="_blank" rel="noopener" download="${esc(d.pdf.name||'문서.pdf')}">${ICON_PDF}<span>${esc(d.pdf.name||'PDF 문서')}</span>${d.pdf.size?`<small>${fileSizeLabel(d.pdf.size)}</small>`:''}</a>`:''}
           ${attachHtml(d,true)}
         </div>
-        <div style="display:flex;flex-direction:column;gap:2px">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+          <button class="draghandle" data-drag title="끌어서 순서 변경"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M8 7h.01M8 12h.01M8 17h.01M16 7h.01M16 12h.01M16 17h.01" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button>
           <button class="mini" data-a="ed">${ICON_EDIT}</button>
           <button class="mini" data-a="del">${ICON_TRASH}</button>
         </div>
@@ -2859,6 +2885,108 @@ const refitFood=()=>{
 bindSplit('#planSplit','plan',refitPlan);
 bindSplit('#shopSplit','shop',refitShop);
 bindSplit('#foodSplit','food',refitFood);
+
+/* ---------- 드래그로 순서 바꾸기 ---------- */
+function makeSortable(container,onReorder){
+  if(!container)return;
+  let dragged=null,startY=0,curDy=0,items=[],scrollTimer=null;
+
+  const cleanup=()=>{
+    if(dragged){dragged.style.transform='';dragged.classList.remove('dragging');}
+    container.classList.remove('sorting');
+    items.forEach(el=>el.style.transition='');
+    dragged=null;curDy=0;
+    clearInterval(scrollTimer);scrollTimer=null;
+  };
+
+  const autoScroll=(y)=>{
+    const sc=container.closest('.panel-scroll')||document.scrollingElement;
+    clearInterval(scrollTimer);
+    const top=40,bot=window.innerHeight-110;
+    if(y<top||y>bot){
+      const dir=y<top?-1:1;
+      scrollTimer=setInterval(()=>{
+        if(sc===document.scrollingElement)window.scrollBy(0,dir*8);
+        else sc.scrollTop+=dir*8;
+      },16);
+    }
+  };
+
+  const onStart=(e,handle)=>{
+    const item=handle.closest('[data-sort]');
+    if(!item)return;
+    dragged=item;
+    items=Array.from(container.querySelectorAll('[data-sort]'));
+    startY=(e.touches?e.touches[0]:e).clientY;
+    curDy=0;
+    dragged.classList.add('dragging');
+    container.classList.add('sorting');
+    if(navigator.vibrate)navigator.vibrate(12);
+  };
+
+  const onMove=(e)=>{
+    if(!dragged)return;
+    const y=(e.touches?e.touches[0]:e).clientY;
+    curDy=y-startY;
+    dragged.style.transform='translateY('+curDy+'px)';
+    autoScroll(y);
+    /* 이웃의 절반을 넘으면 바로 자리를 바꿔요 */
+    const r=dragged.getBoundingClientRect();
+    const prev=dragged.previousElementSibling;
+    const next=dragged.nextElementSibling;
+    if(prev&&prev.hasAttribute('data-sort')){
+      const pr=prev.getBoundingClientRect();
+      if(r.top<pr.top+pr.height/2){
+        container.insertBefore(dragged,prev);
+        startY+=pr.height;curDy=y-startY;
+        dragged.style.transform='translateY('+curDy+'px)';
+      }
+    }
+    if(next&&next.hasAttribute('data-sort')){
+      const nr=next.getBoundingClientRect();
+      if(r.bottom>nr.top+nr.height/2){
+        container.insertBefore(next,dragged);
+        startY-=nr.height;curDy=y-startY;
+        dragged.style.transform='translateY('+curDy+'px)';
+      }
+    }
+    if(e.cancelable)e.preventDefault();
+  };
+
+  const onEnd=()=>{
+    if(!dragged){cleanup();return;}
+    const order=Array.from(container.querySelectorAll('[data-sort]')).map(el=>+el.dataset.sort);
+    cleanup();
+    onReorder(order);
+  };
+
+  container.addEventListener('touchstart',e=>{
+    const h=e.target.closest('[data-drag]');
+    if(!h)return;
+    onStart(e,h);
+    if(e.cancelable)e.preventDefault();
+  },{passive:false});
+  container.addEventListener('touchmove',onMove,{passive:false});
+  container.addEventListener('touchend',onEnd,{passive:true});
+  container.addEventListener('touchcancel',onEnd,{passive:true});
+
+  /* 마우스도 지원 */
+  container.addEventListener('mousedown',e=>{
+    const h=e.target.closest('[data-drag]');
+    if(!h)return;
+    onStart(e,h);e.preventDefault();
+    const mm=ev=>onMove(ev);
+    const mu=()=>{document.removeEventListener('mousemove',mm);document.removeEventListener('mouseup',mu);onEnd();};
+    document.addEventListener('mousemove',mm);
+    document.addEventListener('mouseup',mu);
+  });
+}
+/* 새 순서대로 배열을 다시 정렬해요 */
+function applyOrder(arr,order){
+  const next=order.map(i=>arr[i]).filter(Boolean);
+  if(next.length!==arr.length)return arr.slice();
+  return next;
+}
 
 /* 손잡이를 누르면 목록을 내렸다 올렸다 할 수 있어요 */
 document.querySelectorAll('.panel-grip').forEach(g=>{
